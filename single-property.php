@@ -21,43 +21,55 @@ get_header(); ?>
     $first_location = $location_terms[0]->name;
 ?>
 
-<section>
+<section class="single-property-listing">
 
     <div class="container">
 
-        <div class="property-details">
+        <div class="property-details col-12">
+            <?php if ($yearBuilt) : ?>
             <div class="property-detail">
                 <img src="/wp-content/uploads/2025/08/calendar_OFF-1.png"><p class="detail">Year Built</p><hr class="detail-sep"/><p class="value"><?php echo esc_html($yearBuilt); ?></p>
             </div>
+            <?php endif; ?>
+            <?php if ($bedrooms) : ?>
             <div class="property-detail">
                 <img src="/wp-content/uploads/2025/08/bed_OFF-8.png"><p class="detail">Bedrooms</p><hr class="detail-sep"/><p class="value"><?php echo esc_html($bedrooms); ?></p>
             </div>
+            <?php endif; ?>
+            <?php if ($bathrooms) : ?>
             <div class="property-detail">
                 <img src="/wp-content/uploads/2025/08/BATHROOMS_OFF-8.png"><p class="detail">Bathrooms</p><hr class="detail-sep"/><p class="value"><?php echo esc_html($bathrooms); ?></p>
             </div>
+            <?php endif; ?>
+            <?php if ($buildSize) : ?>
             <div class="property-detail">
                 <img src="/wp-content/uploads/2025/08/HOUSE_OFF-8.png"><p class="detail">Built Size</p><hr class="detail-sep"/><p class="value"><?php echo esc_html($buildSize); ?>M²</p>
             </div>
+            <?php endif; ?>
+            <?php if ($terraceSize) : ?>
             <div class="property-detail">
                 <img src="/wp-content/uploads/2025/08/TERRACE_OFF-1.png"><p class="detail">Terrace Size</p><hr class="detail-sep"/><p class="value"><?php echo esc_html($terraceSize); ?>M²</p>
             </div>
+            <?php endif; ?>
+            <?php if ($plotSize) : ?>
             <div class="property-detail">
                 <img src="/wp-content/uploads/2025/08/PLOT_OFF-8.png"><p class="detail">Plot Size</p><hr class="detail-sep"/><p class="value"><?php echo esc_html($plotSize); ?>M²</p>
             </div>
+            <?php endif; ?>
         </div>
 
     </div>
 
     <div class="container">
 
-        <div class="col-6 property-left">
+        <div class="col-12 col-lg-6 property-left">
 
             <h2 class="property-content-title">Luxury Villas in <?php echo esc_html($first_location); ?></h2>
-            <p class="property-content-p"><?php echo wp_strip_all_tags( get_the_content() ); ?></p>
+            <p class="property-content-p"><?php echo the_content(); ?></p>
 
         </div>
 
-        <div class="col-6 property-right">
+        <div class="col-12 col-lg-6 property-right">
 
             <h2 class="property-content-title pointers-title">Luxury Villas in <?php echo esc_html($first_location); ?></h2>
 
@@ -86,31 +98,44 @@ get_header(); ?>
                 <?php endforeach; ?>
             </div>
         </div>
+        <!-- Thumbnails -->
+        <div class="property-gallery-thumbs swiper">
+            <div class="swiper-wrapper">
+                <?php foreach ($gallery as $image) : ?>
+                    <div class="swiper-slide">
+                        <img src="<?php echo esc_url($image['sizes']['thumbnail']); ?>" alt="<?php echo esc_attr($image['alt']); ?>" />
+                    </div>
+                <?php endforeach; ?>
+            </div>
+        </div>
         <?php endif; ?>
 
     </div>
 
 </section>
 
-<?php get_footer(); ?>
-
+<?php footer_additional_sections(); 
+get_footer();?>
+    
 <script>
-    const propertyGallerySwiper = new Swiper('.swiper', {
-  // Optional parameters
-  direction: 'horizontal',
-  loop: true,
 
-  // Navigation arrows
-  navigation: {
-    nextEl: '.swiper-button-next',
-    prevEl: '.swiper-button-prev',
-  },
+    const thumbsSwiper = new Swiper('.property-gallery-thumbs', {
+        spaceBetween: 10,
+        slidesPerView: 6,
+        freeMode: true,
+        watchSlidesProgress: true,
+    });
 
-});
+    const propertyGallerySwiper = new Swiper('.property-gallery-swiper', {
+        // Optional parameters
+        direction: 'horizontal',
+        loop: true,
+        autoplay: {
+            delay: 5000,
+        },
+        thumbs: {
+            swiper: thumbsSwiper,
+        },
+
+    });
 </script>
-
-<style>
-    .property-gallery-swiper {
-        padding-top: 100px;
-    }
-</style>
