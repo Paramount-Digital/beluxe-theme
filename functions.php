@@ -6,6 +6,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 /* enqueue script libraries */
 function base_enqueue_scripts_styles() {
 
+	$version = time(); // Always bust cache (dev)
+
 	// Sayoshi font
 	wp_enqueue_style('satoshi', '//api.fontshare.com/v2/css?f[]=satoshi@300,301,400,401,500,501,700,701&display=swap' , array(), '1.0.1', 'all');
 
@@ -26,11 +28,11 @@ function base_enqueue_scripts_styles() {
     wp_enqueue_script('readsmore', get_stylesheet_directory_uri() . '/assets/readsmore/index.umd.js', array(), '2.5.1', true);
 
     // Custom theme script
-    wp_enqueue_script('theme-script', get_stylesheet_directory_uri() . '/assets/script.js', array(), '1.0.3114549111', true);
+	wp_enqueue_script('theme-script', get_stylesheet_directory_uri() . '/assets/script.js', array(), $version, true);
 
     // Main stylesheet
     wp_dequeue_style('generate-child');
-    wp_enqueue_style('theme-style', get_stylesheet_directory_uri() . '/style.css', array(), '1.0.11101');
+    wp_enqueue_style('theme-style', get_stylesheet_directory_uri() . '/style.css', array(), '1.0.6');
 
     // Remove unused scripts
     wp_dequeue_script('generate-offside');
@@ -205,7 +207,7 @@ add_filter( 'generate_svg_icon', function( $output, $icon ) {
 	}
 
 	if('menu-bars' === $icon) {
-		$output = '<svg width="29" height="20" viewBox="0 0 29 20" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M2.16251 8.67596C1.33408 8.67596 0.662506 9.34754 0.662506 10.176C0.662506 11.0044 1.33408 11.676 2.16251 11.676V8.67596ZM26.9541 11.676C27.7826 11.676 28.4541 11.0044 28.4541 10.176C28.4541 9.34754 27.7826 8.67596 26.9541 8.67596V11.676ZM2.16251 0.509277C1.33408 0.509277 0.662506 1.18085 0.662506 2.00928C0.662506 2.8377 1.33408 3.50928 2.16251 3.50928V0.509277ZM18.6897 3.50928C19.5181 3.50928 20.1897 2.8377 20.1897 2.00928C20.1897 1.18085 19.5181 0.509277 18.6897 0.509277V3.50928ZM2.16251 16.8426C1.33408 16.8426 0.662506 17.5142 0.662506 18.3426C0.662506 19.171 1.33408 19.8426 2.16251 19.8426V16.8426ZM18.6897 19.8426C19.5181 19.8426 20.1897 19.171 20.1897 18.3426C20.1897 17.5142 19.5181 16.8426 18.6897 16.8426V19.8426ZM2.16251 11.676H26.9541V8.67596H2.16251V11.676ZM2.16251 3.50928H18.6897V0.509277H2.16251V3.50928ZM2.16251 19.8426H18.6897V16.8426H2.16251V19.8426Z" fill="#262B23"/></svg>';
+		$output = '<svg width="29" height="20" viewBox="0 0 29 20" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M2.16251 8.67596C1.33408 8.67596 0.662506 9.34754 0.662506 10.176C0.662506 11.0044 1.33408 11.676 2.16251 11.676V8.67596ZM26.9541 11.676C27.7826 11.676 28.4541 11.0044 28.4541 10.176C28.4541 9.34754 27.7826 8.67596 26.9541 8.67596V11.676ZM2.16251 0.509277C1.33408 0.509277 0.662506 1.18085 0.662506 2.00928C0.662506 2.8377 1.33408 3.50928 2.16251 3.50928V0.509277ZM18.6897 3.50928C19.5181 3.50928 20.1897 2.8377 20.1897 2.00928C20.1897 1.18085 19.5181 0.509277 18.6897 0.509277V3.50928ZM2.16251 16.8426C1.33408 16.8426 0.662506 17.5142 0.662506 18.3426C0.662506 19.171 1.33408 19.8426 2.16251 19.8426V16.8426ZM18.6897 19.8426C19.5181 19.8426 20.1897 19.171 20.1897 18.3426C20.1897 17.5142 19.5181 16.8426 18.6897 16.8426V19.8426ZM2.16251 11.676H26.9541V8.67596H2.16251V11.676ZM2.16251 3.50928H18.6897V0.509277H2.16251V3.50928ZM2.16251 19.8426H18.6897V16.8426H2.16251V19.8426Z" fill="#ffffffff"/></svg>';
 	}
 	
     return $output;
@@ -235,7 +237,7 @@ function blog_filtering_options() {
 }
 add_action('generate_before_main_content', 'blog_filtering_options', 5);
 
-// Contaci Info Shottcode
+// Contact Info Shortcode
 function contact_info_shortcode( $atts = [], $content = '', $tag = '' ) {
 	// Ensure ACF is available
 	if ( ! function_exists( 'have_rows' ) ) {
@@ -271,17 +273,10 @@ function contact_info_shortcode( $atts = [], $content = '', $tag = '' ) {
 		if ( strpos( $lower, 'mailto:' ) !== false ) {
 			$is_email = true;
 			$href = $url;
-		} elseif ( strpos( $lower, 'tel:' ) !== false ) {
+		} else if ( strpos( $lower, 'tel:' ) !== false ) {
 			$is_phone = true;
 			$href = $url;
-		} elseif ( filter_var( $url, FILTER_VALIDATE_EMAIL ) ) {
-			$is_email = true;
-			$href = 'mailto:' . $url;
-		} elseif ( preg_match( '/^\+?[0-9\s().-]{7,}$/', $url ) ) {
-			$is_phone = true;
-			$digits = preg_replace( '/[^0-9+]/', '', $url );
-			$href = 'tel:' . $digits;
-		}
+		} 
 
 		// Icons
 		$email_svg = '<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32" fill="none"><path d="M28.555 11.1677L16.555 3.16766C16.3907 3.05802 16.1975 2.99951 16 2.99951C15.8025 2.99951 15.6093 3.05802 15.445 3.16766L3.445 11.1677C3.30801 11.2591 3.19572 11.3829 3.11809 11.5281C3.04046 11.6733 2.99989 11.8355 3 12.0002V25.0002C3 25.5306 3.21071 26.0393 3.58579 26.4144C3.96086 26.7894 4.46957 27.0002 5 27.0002H27C27.5304 27.0002 28.0391 26.7894 28.4142 26.4144C28.7893 26.0393 29 25.5306 29 25.0002V12.0002C29.0001 11.8355 28.9595 11.6733 28.8819 11.5281C28.8043 11.3829 28.692 11.2591 28.555 11.1677ZM12.09 19.0002L5 24.0002V13.9414L12.09 19.0002ZM14.1362 20.0002H17.8638L24.9425 25.0002H7.0575L14.1362 20.0002ZM19.91 19.0002L27 13.9414V24.0002L19.91 19.0002Z" fill="#BFA570"/></svg>';
@@ -310,4 +305,80 @@ function contact_info_shortcode( $atts = [], $content = '', $tag = '' ) {
 	return $output;
 }
 add_shortcode( 'contact-info', 'contact_info_shortcode' );
+
+function property_filter_shortcode() {
+    ob_start();
+    get_template_part('elements/partials/property-filter');
+    return ob_get_clean();
+}
+add_shortcode('property_filter', 'property_filter_shortcode');
+
+add_action('pre_get_posts', function($query) {
+    if (!is_admin() && $query->is_main_query()) {
+
+        // Force homepage to only show properties
+        if ($query->is_home()) {
+            $query->set('post_type', 'property'); // your CPT slug
+            $query->set('posts_per_page', 9);     // adjust as needed
+        }
+
+        // Apply filters on archive and homepage
+        if ($query->is_post_type_archive('property') || $query->is_home()) {
+
+            $meta_query = [];
+
+            // Locations (taxonomy)
+            if (!empty($_GET['locations'])) {
+                $query->set('tax_query', [[
+                    'taxonomy' => 'locations',
+                    'field'    => 'slug',
+                    'terms'    => sanitize_text_field($_GET['locations'])
+                ]]);
+            }
+
+            // Bedrooms
+            if (!empty($_GET['bedrooms'])) {
+                $meta_query[] = [
+                    'key'     => 'bedrooms',
+                    'value'   => (int) $_GET['bedrooms'],
+                    'compare' => '='
+                ];
+            }
+
+            // Reference Number
+            if (!empty($_GET['reference_number'])) {
+                $meta_query[] = [
+                    'key'   => 'reference_number',
+                    'value' => sanitize_text_field($_GET['reference_number']),
+                ];
+            }
+
+            // Min Price
+            if (!empty($_GET['price_min'])) {
+                $meta_query[] = [
+                    'key'     => 'for_sale_price',
+                    'value'   => (int) $_GET['price_min'],
+                    'compare' => '>=',
+                    'type'    => 'NUMERIC'
+                ];
+            }
+
+            // Max Price
+            if (!empty($_GET['price_max'])) {
+                $meta_query[] = [
+                    'key'     => 'for_sale_price',
+                    'value'   => (int) $_GET['price_max'],
+                    'compare' => '<=',
+                    'type'    => 'NUMERIC'
+                ];
+            }
+
+            if (!empty($meta_query)) {
+                $query->set('meta_query', $meta_query);
+            }
+        }
+    }
+});
+
+
 

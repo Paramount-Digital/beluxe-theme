@@ -58,32 +58,6 @@ document.addEventListener(
 		}
 		
 
-
-		//nice select2 vanilla js 
-		if(typeof NiceSelect != 'undefined') {
-
-			var all_select_instances = [];
-			let select_el = document.querySelectorAll('select');
-
-			for (let i = 0; i < select_el.length; i++) {         
-				var nice_select_instance = NiceSelect.bind(document.querySelectorAll("select")[i]);
-				all_select_instances.push(nice_select_instance);
-			}
-
-			reset_niceselect = function() {
-
-				for (let i = 0; i < all_select_instances.length; i++) {
-					all_select_instances[i].update();
-				}
-
-			}
-			
-			//membership tabs
-			
-
-		}
-
-
 		//readmore functionality
 		if(typeof readSmore != "undefined") {
 
@@ -129,44 +103,63 @@ document.addEventListener(
 				},
 				speed: 4000,
 			} );
-		}
 
-		// Content image slider: images slide, content fades
-		if ( typeof Swiper !== 'undefined' ) {
+		// Content image slider - 2 sliders in one section
 			document.querySelectorAll('.content-image-slider').forEach(section => {
-				const container = section.querySelector('.swiper-container');
-				const nextEl = section.querySelector('.swiper-button-next');
-				const prevEl = section.querySelector('.swiper-button-prev');
-				const contents = Array.from(section.querySelectorAll('.content-stack .content-item'));
-				if (!container || contents.length === 0) return;
+				const imagesContainer = section.querySelector('.images-slider.swiper-container');
+				const contentContainer = section.querySelector('.content-slider.swiper-container');
+				const nextEl = section.querySelector('.content-image-slider .image-slider-next');
+				const prevEl = section.querySelector('.content-image-slider .image-slider-prev');
+				if (!imagesContainer || !contentContainer) return;
 
-				const activate = (index) => {
-					contents.forEach((el, i) => {
-						if (i === index) {
-							el.classList.add('is-active');
-							el.setAttribute('aria-hidden', 'false');
-						} else {
-							el.classList.remove('is-active');
-							el.setAttribute('aria-hidden', 'true');
-						}
-					});
-				};
-
-				activate(0);
-
-				const swiper = new Swiper(container, {
+				// Content slider
+				const contentSwiper = new Swiper(contentContainer, {
 					slidesPerView: 1,
-					loop: contents.length > 1,
-					speed: 800,
+					effect: 'fade',
+					fadeEffect: { crossFade: true },
+					allowTouchMove: false,
+				});
+
+				// Image slider with fraction nav
+				const imagesSwiper = new Swiper(imagesContainer, {
+					slidesPerView: 1,
+					loop: contentSwiper.slides.length > 1,
+					speed: 600,
+					spaceBetween: 20,
 					navigation: { nextEl, prevEl },
-					effect: 'slide',
-					on: {
-						slideChange() {
-							activate(this.realIndex);
-						}
-					}
+					pagination: {
+       						el: ".image-slider-pagination",
+        					type: "fraction",
+      						},
+				});
+
+				// Sync content fade to image slide
+				imagesSwiper.on('slideChange', () => {
+					contentSwiper.slideTo(imagesSwiper.realIndex);
+				});
+			});
+			
+			
+			// Featured property slider
+			document.querySelectorAll('.featured-property-slider').forEach(section => {
+				const container = section.querySelector('.property-slider.swiper-container');
+				const prevEl = section.querySelector('.property-slider .property-slider-prev');
+				const nextEl = section.querySelector('.property-slider .property-slider-next');
+				if (!container) return;
+
+				new Swiper(container, {
+					slidesPerView: 1.1,
+					loop: true,
+					speed: 800,
+					spaceBetween: 20,
+					navigation: { prevEl, nextEl },
+					pagination: {
+       						el: ".property-slider-pagination",
+        					type: "fraction",
+      						},
 				});
 			});
 		}
+		
 	}
 )
