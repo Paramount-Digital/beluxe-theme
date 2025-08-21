@@ -24,11 +24,6 @@ $area_guides = new WP_Query([
                     </div>
                 <?php endif; ?>
                 <h3><?php the_title(); ?></h3>
-                <?php if ( is_singular('area-guides') ) : ?>
-                    <div class="area-guide-date">
-                        <?php echo get_the_date(); ?>
-                    </div>
-                <?php endif; ?>
                 <p><?php echo wp_trim_words(get_the_excerpt(), 20); ?><p>
                 <div class="property-link-container">
                     <a href="<?php the_permalink(); ?>" class="property-link">Find Out More</a>
