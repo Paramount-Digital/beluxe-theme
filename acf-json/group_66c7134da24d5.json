@@ -777,6 +777,138 @@
                     ],
                     "min": "",
                     "max": ""
+                },
+                "layout_689b184a77633": {
+                    "key": "layout_689b184a77633",
+                    "name": "property_listings",
+                    "label": "Property Listings",
+                    "display": "block",
+                    "sub_fields": [],
+                    "min": "",
+                    "max": ""
+                },
+                "layout_689c6fde8053e": {
+                    "key": "layout_689c6fde8053e",
+                    "name": "featured_property_slider",
+                    "label": "Featured Property Slider (Large Image Slider)",
+                    "display": "block",
+                    "sub_fields": [
+                        {
+                            "key": "field_689c704880540",
+                            "label": "Property Slider",
+                            "name": "property_slider",
+                            "aria-label": "",
+                            "type": "repeater",
+                            "instructions": "",
+                            "required": 0,
+                            "conditional_logic": 0,
+                            "wrapper": {
+                                "width": "",
+                                "class": "",
+                                "id": ""
+                            },
+                            "layout": "block",
+                            "min": 0,
+                            "max": 0,
+                            "collapsed": "",
+                            "button_label": "Add Row",
+                            "rows_per_page": 20,
+                            "sub_fields": [
+                                {
+                                    "key": "field_689c705a80541",
+                                    "label": "Description",
+                                    "name": "description",
+                                    "aria-label": "",
+                                    "type": "textarea",
+                                    "instructions": "This should be a short paragraph to describe the chosen property, it will appear in a gold box above the property image.",
+                                    "required": 0,
+                                    "conditional_logic": 0,
+                                    "wrapper": {
+                                        "width": "50",
+                                        "class": "",
+                                        "id": ""
+                                    },
+                                    "default_value": "",
+                                    "maxlength": "",
+                                    "allow_in_bindings": 0,
+                                    "rows": "",
+                                    "placeholder": "",
+                                    "new_lines": "",
+                                    "parent_repeater": "field_689c704880540"
+                                },
+                                {
+                                    "key": "field_689c70aa80542",
+                                    "label": "Property",
+                                    "name": "property",
+                                    "aria-label": "",
+                                    "type": "relationship",
+                                    "instructions": "Choose the property to display for this slide. The properties featured image will display almost full width and the property price and link to view it will also show.",
+                                    "required": 0,
+                                    "conditional_logic": 0,
+                                    "wrapper": {
+                                        "width": "50",
+                                        "class": "",
+                                        "id": ""
+                                    },
+                                    "post_type": [
+                                        "property"
+                                    ],
+                                    "post_status": [
+                                        "publish"
+                                    ],
+                                    "taxonomy": "",
+                                    "filters": [
+                                        "search",
+                                        "taxonomy"
+                                    ],
+                                    "return_format": "object",
+                                    "min": "",
+                                    "max": "",
+                                    "allow_in_bindings": 0,
+                                    "elements": [
+                                        "featured_image"
+                                    ],
+                                    "bidirectional": 0,
+                                    "bidirectional_target": [],
+                                    "parent_repeater": "field_689c704880540"
+                                }
+                            ]
+                        }
+                    ],
+                    "min": "",
+                    "max": ""
+                },
+                "layout_68a6bed4a6685": {
+                    "key": "layout_68a6bed4a6685",
+                    "name": "property_grid",
+                    "label": "Property Grid",
+                    "display": "block",
+                    "sub_fields": [
+                        {
+                            "key": "field_68a6c6be9071b",
+                            "label": "Property Grid Fields",
+                            "name": "property_grid_fields",
+                            "aria-label": "",
+                            "type": "clone",
+                            "instructions": "",
+                            "required": 0,
+                            "conditional_logic": 0,
+                            "wrapper": {
+                                "width": "",
+                                "class": "",
+                                "id": ""
+                            },
+                            "clone": [
+                                "field_66c717d59b6e3"
+                            ],
+                            "display": "seamless",
+                            "layout": "block",
+                            "prefix_label": 0,
+                            "prefix_name": 0
+                        }
+                    ],
+                    "min": "",
+                    "max": ""
                 }
             },
             "min": "",
@@ -802,5 +934,5 @@
     "active": true,
     "description": "",
     "show_in_rest": 0,
-    "modified": 1754661086
+    "modified": 1755761981
 }
