@@ -13,7 +13,7 @@ $fields = [
 // Build section classes 
 $classes = array_filter([
   'content-form-section',
-  'background-' . sanitize_html_class( $fields['background'] ),
+  'background-' . sanitize_html_class( $fields['background'] ?: 'black' ),
 ]);
 
 // Start section
@@ -36,11 +36,20 @@ echo '<div class="container">';
             . '</div>';
     echo $html;
     base_get_content_buttons();
+    echo do_shortcode('[contact-info]');
     echo '</div>';
+  } else {
+    echo '<div class="col-12 col-lg-6 section-intro">';
+    echo '<h2>Our team are here to answer all of your questions</h2>
+          <p>If you have any questions about any of the properties listed on our website and would like to find out more, our team will be happy to help! Fill out the form and one of our team will be in touch ASAP, or contact us directly by phone or email.</p>
+          <h4>Contact details</h4>';
+          echo do_shortcode('[contact-info]');
+          echo '</div>';
   }
 
     // Contact form shortcode
-   echo '<div class="col-12 col-lg-6 contact-form">' . do_shortcode( $fields['form'] ) . '</div>';
+  $form_shortcode = $fields['form'] ? $fields['form'] : '[contact-form-7 id="1ac0f2a" title="Contact form 1"]';
+  echo '<div class="col-12 col-lg-6 contact-form">' . do_shortcode( $form_shortcode ) . '</div>';
 
   echo '</div>
 

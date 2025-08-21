@@ -159,6 +159,7 @@ function category_title_wrap_ending() {
  */
 function footer_additional_sections() {
 	$elements = [
+		'content-with-contact-form-section' => 'Content with contact form section template part not found',
 		'reviews-slider' => 'Reviews slider template part not found',
 		'social-bar'     => 'Social bar template part not found',
 	];
