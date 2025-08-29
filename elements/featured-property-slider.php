@@ -35,9 +35,7 @@ if ( ! empty( $slides ) ) : ?>
                 <div class="swiper-wrapper">
                     <?php foreach ( $slides as $slide ) : ?>
                         <div class="swiper-slide property-slide">
-                            <?php if ( ! empty( $slide['thumb_id'] ) ) : ?>
-                                <?php echo wp_get_attachment_image( $slide['thumb_id'], 'full' ); ?>
-                            <?php endif; ?>
+                            <?php if ( ! empty( $slide['thumb_id'] ) ) { echo wp_get_attachment_image( $slide['thumb_id'], 'full' ); } ?>
                             <div class="container">
                                 <div class="property-slider-content dark-gold">
                                     <?php echo wp_kses_post( $slide['description'] ); ?>
@@ -50,9 +48,9 @@ if ( ! empty( $slides ) ) : ?>
                                         ?>
                                             <span class="price"><?php echo esc_html( $formatted_price ); ?></span>
                                         <?php endif; endif; ?>
-                                        <?php if ( $slide['link'] ) : ?>
-                                            <a class="view-link" href="<?php echo esc_url( $slide['link'] ); ?>">View Property</a>
-                                        <?php endif; ?>
+                                        <?php if ( $slide['link'] ) {
+                                            echo '<a class="view-link" href="' . esc_url( $slide['link'] ) . '">View Property</a>';
+                                        } ?>
                                     </div>
                                 </div>
                              </div>

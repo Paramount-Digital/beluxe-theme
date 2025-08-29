@@ -1,15 +1,13 @@
 <?php
 
 if ( ! defined( 'ABSPATH' ) ) {
-	exit; // Exit if accessed directly.
+    exit; // Exit if accessed directly.
 }
 
-?>
 
-<?php
 // Preserve selections
 $selected_location = $_GET['locations'] ?? '';
-$selected_type     = $_GET['property_type'] ?? '';
+$selected_type     = $_GET['property-type'] ?? '';
 $selected_bedrooms = $_GET['bedrooms'] ?? '';
 $selected_min      = $_GET['price_min'] ?? '';
 $selected_max      = $_GET['price_max'] ?? '';
@@ -28,6 +26,88 @@ function get_unique_acf_values_sorted($field_name, $numeric = false) {
     $numeric ? sort($results, SORT_NUMERIC) : sort($results, SORT_STRING);
     return $results;
 }
+
+// Max price helper (only published 'property' posts)
+function get_max_for_sale_price() {
+    global $wpdb;
+    $max = $wpdb->get_var( $wpdb->prepare("
+        SELECT MAX(CAST(pm.meta_value AS UNSIGNED))
+        FROM $wpdb->postmeta pm
+        INNER JOIN $wpdb->posts p ON p.ID = pm.post_id
+        WHERE pm.meta_key = %s
+          AND p.post_type = %s
+          AND p.post_status = 'publish'
+    ", 'for_sale_price', 'property') );
+    $max = (int) $max;
+    // Safety floor and ceiling to prevent pathological ranges
+    $HARD_CAP = 100000000; // 100,000,000
+    if ($max <= 0) {
+        $max = 200000; // sensible floor
+    } elseif ($max > $HARD_CAP) {
+        $max = $HARD_CAP;
+    }
+    return $max;
+}
+
+// Build stepped price scale:
+// - 200,000 to < 1,000,000 step 100,000
+// - 1,000,000 to < 3,000,000 step 500,000
+// - 3,000,000 to < 10,000,000 step 1,000,000
+// - 10,000,000+ step 10,000,000
+function build_price_scale($max_price) {
+    $min_start = 200000;
+    $max_price = max($min_start, (int) $max_price);
+
+    $values = [];
+
+    // Segment 1: 200k .. <1m by 100k
+    for ($v = $min_start; $v < min($max_price, 1000000); $v += 100000) {
+        $values[] = $v;
+    }
+
+    // Segment 2: 1m .. <3m by 500k
+    if ($max_price >= 1000000) {
+        for ($v = 1000000; $v < min($max_price, 3000000); $v += 500000) {
+            $values[] = $v;
+        }
+    }
+
+    // Segment 3: 3m .. <10m by 1m
+    if ($max_price >= 3000000) {
+        for ($v = 3000000; $v < min($max_price, 10000000); $v += 1000000) {
+            $values[] = $v;
+        }
+    }
+
+    // Segment 4: 10m .. <= max by 10m
+    if ($max_price >= 10000000) {
+        for ($v = 10000000; $v <= $max_price; $v += 10000000) {
+            $values[] = $v;
+        }
+    }
+
+    // Add one step above the max to ensure Max dropdown can cover all listings
+    if (!empty($values)) {
+        $last = end($values);
+    } else {
+        $last = $min_start;
+        $values[] = $last;
+    }
+
+    $step = ($last < 1000000) ? 100000
+        : (($last < 3000000) ? 500000
+        : (($last < 10000000) ? 1000000 : 10000000));
+    $values[] = $last + $step;
+
+    $values = array_values(array_unique($values));
+    sort($values, SORT_NUMERIC);
+
+    return $values;
+}
+
+// Build the options once
+$max_site_price = get_max_for_sale_price();
+$price_options  = build_price_scale($max_site_price);
 ?>
 
 <div class="col-12 property-filter">
@@ -51,22 +131,26 @@ function get_unique_acf_values_sorted($field_name, $numeric = false) {
             ?>
         </select>
 
-        <!-- Property Type (ACF text) -->
-        <select name="property_type">
+        <!-- Property Type (taxonomy) -->
+        <select name="property-type">
             <option value="">All Types of Property</option>
-            <?php foreach (get_unique_acf_values_sorted('property_type') as $type): ?>
-                <option value="<?php echo esc_attr($type); ?>" <?php selected($selected_type, $type); ?>>
-                    <?php echo esc_html($type); ?>
-                </option>
-            <?php endforeach; ?>
+            <?php
+            $property_types = get_terms([
+                'taxonomy' => 'property-type',
+                'hide_empty' => true
+            ]);
+            foreach ($property_types as $type) {
+                echo '<option value="' . esc_attr($type->slug) . '" ' . selected($selected_type, $type->slug, false) . '>' . esc_html($type->name) . '</option>';
+            }
+            ?>
         </select>
 
         <div class="price-selects">
             <!-- Min Price -->
             <select name="price_min" class="min-price">
                 <option value="">Min Price</option>
-                <?php foreach (get_unique_acf_values_sorted('for_sale_price', true) as $price): ?>
-                    <option value="<?php echo esc_attr($price); ?>" <?php selected($selected_min, $price); ?>>
+                <?php foreach ($price_options as $price): ?>
+                    <option value="<?php echo esc_attr($price); ?>" <?php selected((string)$selected_min, (string)$price); ?>>
                         <?php echo number_format($price); ?>
                     </option>
                 <?php endforeach; ?>
@@ -75,8 +159,8 @@ function get_unique_acf_values_sorted($field_name, $numeric = false) {
             <!-- Max Price -->
             <select name="price_max" class="max-price">
                 <option value="">Max Price</option>
-                <?php foreach (get_unique_acf_values_sorted('for_sale_price', true) as $price): ?>
-                    <option value="<?php echo esc_attr($price); ?>" <?php selected($selected_max, $price); ?>>
+                <?php foreach ($price_options as $price): ?>
+                    <option value="<?php echo esc_attr($price); ?>" <?php selected((string)$selected_max, (string)$price); ?>>
                         <?php echo number_format($price); ?>
                     </option>
                 <?php endforeach; ?>
@@ -98,12 +182,15 @@ function get_unique_acf_values_sorted($field_name, $numeric = false) {
 
         <button type="submit">Search Properties</button>
         <button type="button" id="reset-filter">Reset</button>
-                <script>
-                document.getElementById('reset-filter').onclick = function() {
-                    const form = this.closest('form');
-                    form.reset();
-                };
-                </script>
+        <script>
+        document.getElementById('reset-filter').onclick = function() {
+            const form = this.closest('form');
+            form.reset();
+
+            // Reload the page without any query parameters
+            window.location.href = window.location.pathname;
+        };
+        </script>
     </form>
     </div>
     </div>
@@ -121,21 +208,25 @@ function get_unique_acf_values_sorted($field_name, $numeric = false) {
             ?>
         </select>
 
-        <!-- Property Type (ACF text) -->
-        <select name="property_type">
+        <!-- Property Type (taxonomy) -->
+        <select name="property-type">
             <option value="">All Types of Property</option>
-            <?php foreach (get_unique_acf_values_sorted('property_type') as $type): ?>
-                <option value="<?php echo esc_attr($type); ?>" <?php selected($selected_type, $type); ?>>
-                    <?php echo esc_html($type); ?>
-                </option>
-            <?php endforeach; ?>
+            <?php
+            $property_types = get_terms([
+                'taxonomy' => 'property-type',
+                'hide_empty' => false
+            ]);
+            foreach ($property_types as $type) {
+                echo '<option value="' . esc_attr($type->slug) . '" ' . selected($selected_type, $type->slug, false) . '>' . esc_html($type->name) . '</option>';
+            }
+            ?>
         </select>
 
         <!-- Min Price -->
         <select name="price_min">
             <option value="">Min Price</option>
-            <?php foreach (get_unique_acf_values_sorted('for_sale_price', true) as $price): ?>
-                <option value="<?php echo esc_attr($price); ?>" <?php selected($selected_min, $price); ?>>
+            <?php foreach ($price_options as $price): ?>
+                <option value="<?php echo esc_attr($price); ?>" <?php selected((string)$selected_min, (string)$price); ?>>
                     <?php echo number_format($price); ?>
                 </option>
             <?php endforeach; ?>
@@ -146,6 +237,9 @@ function get_unique_acf_values_sorted($field_name, $numeric = false) {
         document.getElementById('reset-filter1').onclick = function() {
             const form = this.closest('form');
             form.reset();
+
+            // Reload the page without any query parameters
+            window.location.href = window.location.pathname;
         };
         </script>
 
@@ -165,8 +259,8 @@ function get_unique_acf_values_sorted($field_name, $numeric = false) {
         <!-- Max Price -->
         <select name="price_max">
             <option value="">Max Price</option>
-            <?php foreach (get_unique_acf_values_sorted('for_sale_price', true) as $price): ?>
-                <option value="<?php echo esc_attr($price); ?>" <?php selected($selected_max, $price); ?>>
+            <?php foreach ($price_options as $price): ?>
+                <option value="<?php echo esc_attr($price); ?>" <?php selected((string)$selected_max, (string)$price); ?>>
                     <?php echo number_format($price); ?>
                 </option>
             <?php endforeach; ?>
@@ -174,4 +268,3 @@ function get_unique_acf_values_sorted($field_name, $numeric = false) {
         <button type="submit">Search Properties</button>
     </form>
 </div>
-

@@ -22,7 +22,7 @@ $content = get_sub_field('element_content');
       <?php echo $content;?>
     </div>
     <?php if ( $properties->have_posts() ) : ?>
-      <div class="col-12 property-grid">
+      <div class="property-grid col-12">
         <?php while ( $properties->have_posts() ) : $properties->the_post(); ?>
           <div class="property-card">
             <?php if ( has_post_thumbnail() ) : ?>
@@ -55,7 +55,7 @@ $content = get_sub_field('element_content');
                   <p><?php echo get_post_meta(get_the_ID(), 'plot_size', true); ?>m²</p>
                 </div>
               </div>
-              <p><?php echo wp_trim_words(get_the_excerpt(), 20); ?></p>
+              <p><?php echo get_the_excerpt(); ?></p>
               <div class="property-price-sku">
                 <p class="listing-card-price">€<?php echo number_format(get_field('for_sale_price', get_the_ID())); ?></p>
                 <p class="listing-card-ref"><?php echo get_field('reference_number', get_the_ID()); ?></p>
@@ -69,7 +69,7 @@ $content = get_sub_field('element_content');
             </div>
           </div>
         <?php endwhile; ?>
-            </div>
+    </div>
     <?php else : ?>
       <div class="col-12">
         <p>No properties found. View all of our properties <a href="<?php echo esc_url( home_url( '/properties/' ) ); ?>">here</a>.</p>
@@ -78,16 +78,3 @@ $content = get_sub_field('element_content');
   </div>
 </section>
 <?php wp_reset_postdata(); ?>
-
-<style>
-    .header-wrapper {
-        text-align: center;
-        display: flex;
-        flex-direction: column;
-        margin: auto auto 40px auto;
-    }
-
-    .header-wrapper p {
-        margin: 0;
-    }
-    </style>
