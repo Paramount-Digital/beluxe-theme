@@ -9,18 +9,22 @@ $terms = get_terms([
     'hide_empty' => false,
 ]);
 
-if ( ! empty( $terms ) && ! is_wp_error( $terms ) ) : ?>
+if ( ! empty( $terms ) && ! is_wp_error( $terms ) ) :
+    ?>
 <section class="locations-slider">
-    <div class="container">
-        <div class="swiper-container">
-            <div class="swiper-wrapper">
-                <?php foreach ( $terms as $term ) : ?>
-                    <div class="swiper-slide location-name">
-                        <?php echo esc_html( $term->name ); ?>
-                    </div>
-                <?php endforeach; ?>
-            </div>
-        </div>
+    <div class="marquee-container horizontal-marquee">
+            <?php foreach ( $terms as $term ) : ?>
+                <span class="location-name horizontal-marquee-inner"><?php echo esc_html( $term->name ); ?></span>
+            <?php endforeach; ?>
     </div>
 </section>
 <?php endif; ?>
+
+<style>
+    .location-name {     
+        flex: 0 0 auto;
+        margin: 0;
+        padding: 0 36px;
+        position: relative;
+    }
+</style>

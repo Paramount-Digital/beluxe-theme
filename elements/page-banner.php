@@ -26,6 +26,25 @@ if ( is_post_type_archive() ) {
     category_description(),
     do_shortcode( '[searchform post_types="post"]' )
   );
+} elseif ( is_tax( 'property-type' ) ) { 
+    $term = get_queried_object();
+    $fields['sizing'] = 'small-banner';
+    if ( $term->slug === 'new-developments' ) {
+        $fields['content'] = '<h1>New Developments</h1>';
+    } else {
+        $fields['content'] = '<h1>' . esc_html( $term->name ) . '</h1>';
+    }
+} elseif ( is_tax( 'locations' ) ) { 
+    $term = get_queried_object();
+    $fields['sizing'] = 'small-banner';
+    $fields['content'] = '<h1>' . esc_html( $term->name ) . '</h1>';
+} elseif ( is_home()) {
+    $fields['sizing'] = 'small-banner';
+    $fields['content'] = '<h1>Blog</h1>';
+} elseif ( is_page('about') ) {
+  $fields['sizing'] = 'small-banner';
+} elseif ( is_page('contact') ) {
+  $fields['sizing'] = 'small-banner';
 } elseif ( is_search() ) {
   $q = get_search_query();
   $fields['content'] = sprintf(
@@ -155,12 +174,3 @@ if ( is_front_page() || is_post_type_archive('property') ) {
 	</div>
 <?php }
 ?>
-
-<script>
-document.getElementById('open-filter-modal').onclick = function() {
-  document.getElementById('filter-modal').classList.add('active');
-};
-document.getElementById('filter-modal').onclick = function(e) {
-  if (e.target === this) this.classList.remove('active');
-};
-</script>

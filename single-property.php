@@ -25,6 +25,8 @@ get_header(); ?>
 
     <div class="container">
 
+        <?php if ( $yearBuilt || $bedrooms || $bathrooms || $buildSize || $terraceSize || $plotSize ) : ?>
+
         <div class="property-details col-12">
             <?php if ($yearBuilt) : ?>
             <div class="property-detail">
@@ -58,6 +60,8 @@ get_header(); ?>
             <?php endif; ?>
         </div>
 
+        <?php endif; ?>
+
     </div>
 
     <div class="container">
@@ -71,14 +75,25 @@ get_header(); ?>
 
         <div class="col-12 col-lg-6 property-right">
 
-            <h2 class="property-content-title pointers-title">Luxury Villas in <?php echo esc_html($first_location); ?></h2>
+            <h2 class="property-content-title pointers-title">Features and Details</h2>
 
             <?php if ( have_rows('key_features') ) : ?>
-                <ul class="key-features">
+                <?php 
+                    $feature_count = 0; 
+                    $list_id = 'key-features-' . get_the_ID(); 
+                ?>
+                <ul class="key-features" id="<?php echo esc_attr( $list_id ); ?>" data-expanded="false">
                     <?php while ( have_rows('key_features') ) : the_row(); ?>
-                        <li><?php the_sub_field('feature'); ?></li>
+                        <?php 
+                            $feature_count++; 
+                            $hidden_class = ( $feature_count > 14 ) ? ' is-hidden' : ''; 
+                        ?>
+                        <li class="<?php echo esc_attr( $hidden_class ); ?>"><?php the_sub_field('feature'); ?></li>
                     <?php endwhile; ?>
                 </ul>
+                <?php if ( $feature_count > 10 ) : ?>
+                    <button class="key-features-toggle button" type="button" aria-expanded="false" aria-controls="<?php echo esc_attr( $list_id ); ?>" data-more="Show more" data-less="Show less">Show more</button>
+                <?php endif; ?>
             <?php endif; ?>
 
         </div>
