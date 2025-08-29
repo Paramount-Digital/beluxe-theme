@@ -909,6 +909,70 @@
                     ],
                     "min": "",
                     "max": ""
+                },
+                "layout_68ad7bc6c4976": {
+                    "key": "layout_68ad7bc6c4976",
+                    "name": "single_content_block",
+                    "label": "Single Content Block",
+                    "display": "block",
+                    "sub_fields": [
+                        {
+                            "key": "field_68ad7bcfc4979",
+                            "label": "Single Content Block Clone",
+                            "name": "single_content_block_clone",
+                            "aria-label": "",
+                            "type": "clone",
+                            "instructions": "",
+                            "required": 0,
+                            "conditional_logic": 0,
+                            "wrapper": {
+                                "width": "",
+                                "class": "",
+                                "id": ""
+                            },
+                            "clone": [
+                                "field_66c717d59b6e3"
+                            ],
+                            "display": "seamless",
+                            "layout": "block",
+                            "prefix_label": 0,
+                            "prefix_name": 0
+                        }
+                    ],
+                    "min": "",
+                    "max": ""
+                },
+                "layout_68b013d3545d9": {
+                    "key": "layout_68b013d3545d9",
+                    "name": "team_block",
+                    "label": "Team Block",
+                    "display": "block",
+                    "sub_fields": [
+                        {
+                            "key": "field_68b013d9545dc",
+                            "label": "Team Block Clone",
+                            "name": "team_block_clone",
+                            "aria-label": "",
+                            "type": "clone",
+                            "instructions": "",
+                            "required": 0,
+                            "conditional_logic": 0,
+                            "wrapper": {
+                                "width": "",
+                                "class": "",
+                                "id": ""
+                            },
+                            "clone": [
+                                "field_66c717d59b6e3"
+                            ],
+                            "display": "seamless",
+                            "layout": "block",
+                            "prefix_label": 0,
+                            "prefix_name": 0
+                        }
+                    ],
+                    "min": "",
+                    "max": ""
                 }
             },
             "min": "",
@@ -934,5 +998,5 @@
     "active": true,
     "description": "",
     "show_in_rest": 0,
-    "modified": 1755761981
+    "modified": 1756369909
 }
