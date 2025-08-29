@@ -1,25 +1,6 @@
 document.addEventListener(
 	"DOMContentLoaded", async () => {
 
-		// //mmenu slideout menu navigation
-		// const slideout_menu = document.querySelector( "#generate-slideout-menu .inside-navigation" );
-		
-		// //initialise MmenuLight for mobile menu & if has children items to create menu
-		// if(typeof MmenuLight != 'undefined') {
-				
-		// 	const menu = new MmenuLight(slideout_menu),
-		// 		  menu_navigation = menu.navigation(),
-		// 		  drawer = menu.offcanvas();
-
-		// 	document.querySelector( '.menu-toggle' )
-		// 		.addEventListener(
-		// 			"click", ( evnt ) => {
-		// 				evnt.preventDefault();
-		// 				drawer.open();
-		// 			}
-		// 		);
-			
-		// }
 		
 		// remove song-2 (blur) class from banner-content on page load
 		setTimeout(() => {
@@ -27,8 +8,33 @@ document.addEventListener(
 			if (bannerContent) {
 				bannerContent.classList.remove('song-2');
 			} 
-		}, 1000);
+		}, 200);
 
+        //initialise Choices for select elements
+        if(typeof Choices != 'undefined') {
+
+            // Change placeholder text for phone prefix select to "Prefix"
+            const phonePrefixSelect = document.querySelector('.phone-wrapper [data-name="phone-prefix"] select, .phone-wrapper [data-name="prone-prefix"] select');
+            if (phonePrefixSelect) {
+                const placeholderOpt =
+                    phonePrefixSelect.querySelector('option[value=""], option[disabled][selected], option[disabled][value=""]')
+                    || phonePrefixSelect.options[0];
+                if (placeholderOpt) {
+                    placeholderOpt.textContent = 'Prefix';
+                }
+            }
+            
+            const select_elements = document.querySelectorAll('select');
+
+            //apply Choices to all select elements
+            select_elements?.forEach(select => {
+                new Choices(select, {
+                    searchEnabled: true,
+                    searchPlaceholderValue: 'Search...',
+                });
+            });
+
+        }
 
 		// close all details elements on click
 		const details_elements = document.querySelectorAll('details');
@@ -154,12 +160,69 @@ document.addEventListener(
 					spaceBetween: 20,
 					navigation: { prevEl, nextEl },
 					pagination: {
-       						el: ".property-slider-pagination",
-        					type: "fraction",
-      						},
+						el: ".property-slider-pagination",
+						type: "fraction",
+					},
+					centeredSlides: true,
+					breakpoints: {
+						768: {
+							centeredSlides: false
+						}
+					}
 				});
 			});
+
+			// Initialize Infinite Marquee for locations
+				new InfiniteMarquee({
+					element: '.marquee-container',
+					speed: 25000,
+					smoothEdges: false,
+					direction: 'right',
+					gap: '10px',
+					duplicateCount: -1,
+					duplicateInnerElements: false,
+					mobileSettings: {
+						direction: 'top',
+						speed: 20000
+					},
+					on: {
+						beforeInit: () => {
+							console.log('Not Yet Initialized');
+						},
+
+						afterInit: () => {
+							console.log('Initialized');
+						}
+					}
+				});
 		}
-		
-	}
-)
+
+			// Key features: toggle show more/less
+			const featureToggles = document.querySelectorAll('.key-features-toggle');
+			featureToggles.forEach(btn => {
+				btn.addEventListener('click', () => {
+					const listId = btn.getAttribute('aria-controls');
+					const list = document.getElementById(listId);
+					if (!list) return;
+					const expanded = list.getAttribute('data-expanded') === 'true';
+					list.setAttribute('data-expanded', expanded ? 'false' : 'true');
+					btn.setAttribute('aria-expanded', expanded ? 'false' : 'true');
+					const more = btn.getAttribute('data-more') || 'Show more';
+					const less = btn.getAttribute('data-less') || 'Show less';
+					btn.textContent = expanded ? more : less;
+				});
+			});
+
+			const openBtn = document.getElementById('open-filter-modal');
+			const modal = document.getElementById('filter-modal');
+
+			if (openBtn && modal) {
+					openBtn.onclick = () => {
+					modal.classList.add('active');
+				};
+
+				modal.onclick = (e) => {
+				if (e.target === modal) modal.classList.remove('active');
+				};
+			}
+	});
