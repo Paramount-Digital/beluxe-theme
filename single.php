@@ -23,27 +23,56 @@ get_header(); ?>
 		?>
 		<div class="container">
 			<div class="col-12 col-lg-9"><?php
-			if ( generate_has_default_loop() ) {
-				while ( have_posts() ) :
+				if ( generate_has_default_loop() ) {
+					while ( have_posts() ) :
 
-					the_post();
+						the_post();
 
-					//show article content if post has content
-					if(!empty(get_the_content()))
-						generate_do_template_part( 'single' );
+						//show article content if post has content
+						if(!empty(get_the_content()))
+							generate_do_template_part( 'single' );
 
-				endwhile;
-			}
-			?></div>
+					endwhile;
+				}?>
+				<div class="background-white guide-form">
+					<h3>Enquires About Properties In Marbella</h3>
+				<?php echo do_shortcode('[contact-form-7 id="1ac0f2a" title="Contact form 1"]'); ?>	
+				</div>
+				<div class="guide-details">
+					<?php echo get_avatar(get_the_author_meta('ID'), 48, '', get_the_author(), ['class' => 'guide-author-avatar']); ?>
+					<div class="guide-author-info">
+						<span class="guide-author-label">Written by</span><br>
+						<div class="guide-name">
+							<h2 class="guide-author-name"><?php the_author(); ?></h2>
+							<?php $job_title = get_field('job_title', 'user_' . get_the_author_meta('ID')); ?>
+							<?php if ($job_title): ?>
+								<span class="guide-author-job"><?php echo esc_html($job_title); ?></span>
+							<?php endif; ?>
+						</div>
+						<?php get_template_part('elements/partials/guide-socials');	?>
+						<div class="guide-text">
+							<?php $guide_details = get_field('guide_details', 'option');
+							if ($guide_details):
+								echo esc_html( wp_strip_all_tags( $guide_details ) );
+							endif; ?>
+						</div>
+					</div>
+					<div class="guide-read-more">
+						<a href="/guides" class="button">Read More</a>
+					</div>
+				</div>
+			</div>
 			<div class="col-12 col-lg-3 guide-sidebar">
-				<a href="/guides">
-					<button>
-						<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none">
-							<path d="M17.4995 9.99998C17.4995 10.1657 17.4337 10.3247 17.3165 10.4419C17.1992 10.5591 17.0403 10.625 16.8745 10.625H4.63311L9.1917 15.1828C9.24977 15.2409 9.29584 15.3098 9.32726 15.3857C9.35869 15.4615 9.37486 15.5429 9.37486 15.625C9.37486 15.7071 9.35869 15.7884 9.32726 15.8643C9.29584 15.9402 9.24977 16.0091 9.1917 16.0672C9.13363 16.1252 9.0647 16.1713 8.98883 16.2027C8.91296 16.2342 8.83164 16.2503 8.74952 16.2503C8.66739 16.2503 8.58608 16.2342 8.51021 16.2027C8.43433 16.1713 8.3654 16.1252 8.30733 16.0672L2.68233 10.4422C2.62422 10.3841 2.57812 10.3152 2.54667 10.2393C2.51521 10.1634 2.49902 10.0821 2.49902 9.99998C2.49902 9.91785 2.51521 9.83652 2.54667 9.76064C2.57812 9.68477 2.62422 9.61584 2.68233 9.55779L8.30733 3.93279C8.4246 3.81552 8.58366 3.74963 8.74952 3.74963C8.91537 3.74963 9.07443 3.81552 9.1917 3.93279C9.30898 4.05007 9.37486 4.20913 9.37486 4.37498C9.37486 4.54083 9.30898 4.69989 9.1917 4.81717L4.63311 9.37498H16.8745C17.0403 9.37498 17.1992 9.44083 17.3165 9.55804C17.4337 9.67525 17.4995 9.83422 17.4995 9.99998Z" fill="white"/>
-						</svg>
-						Back to Guides
-					</button>
-				</a>
+				<?php if ( ! is_singular('post') ) : ?>
+					<a href="/guides" class="guides-back-button">
+						<button>
+							<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none">
+								<path d="M17.4995 9.99998C17.4995 10.1657 17.4337 10.3247 17.3165 10.4419C17.1992 10.5591 17.0403 10.625 16.8745 10.625H4.63311L9.1917 15.1828C9.24977 15.2409 9.29584 15.3098 9.32726 15.3857C9.35869 15.4615 9.37486 15.5429 9.37486 15.625C9.37486 15.7071 9.35869 15.7884 9.32726 15.8643C9.29584 15.9402 9.24977 16.0091 9.1917 16.0672C9.13363 16.1252 9.0647 16.1713 8.98883 16.2027C8.91296 16.2342 8.83164 16.2503 8.74952 16.2503C8.66739 16.2503 8.58608 16.2342 8.51021 16.2027C8.43433 16.1713 8.3654 16.1252 8.30733 16.0672L2.68233 10.4422C2.62422 10.3841 2.57812 10.3152 2.54667 10.2393C2.51521 10.1634 2.49902 10.0821 2.49902 9.99998C2.49902 9.91785 2.51521 9.83652 2.54667 9.76064C2.57812 9.68477 2.62422 9.61584 2.68233 9.55779L8.30733 3.93279C8.4246 3.81552 8.58366 3.74963 8.74952 3.74963C8.91537 3.74963 9.07443 3.81552 9.1917 3.93279C9.30898 4.05007 9.37486 4.20913 9.37486 4.37498C9.37486 4.54083 9.30898 4.69989 9.1917 4.81717L4.63311 9.37498H16.8745C17.0403 9.37498 17.1992 9.44083 17.3165 9.55804C17.4337 9.67525 17.4995 9.83422 17.4995 9.99998Z" fill="white"/>
+							</svg>
+							Back to Guides
+						</button>
+					</a>
+				<?php endif; ?>
 				<div class="text-section">
 					<h3>Contact Us</h3>
 					<p>For bookings and properties email <a href="mailto:info@beluxeproperties.com"><strong>info@beluxeproperties.com</strong></a></p>
@@ -59,7 +88,9 @@ get_header(); ?>
 					<p>Your dream destinations are at your fingertips, have a look.</p>
 				</div>
 			</div>
-		</div><?php
+		</div>
+						
+		<?php
 
 		/**
 		 * generate_after_main_content hook.

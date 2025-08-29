@@ -11,18 +11,21 @@ function base_enqueue_scripts_styles() {
 	// Sayoshi font
 	wp_enqueue_style('satoshi', '//api.fontshare.com/v2/css?f[]=satoshi@300,301,400,401,500,501,700,701&display=swap' , array(), '1.0.1', 'all');
 
-
     // Swiper carousel
     wp_enqueue_script('swiper-carousel', get_stylesheet_directory_uri() . '/assets/swiper/swiper-bundle.min.js', array(), '11.0.5', true);
     wp_enqueue_style('swiper-carousel', get_stylesheet_directory_uri() . '/assets/swiper/swiper-bundle.min.css', array(), '11.0.5');
 
+	// Infinite Marquee
+	wp_enqueue_script('infinite-marquee', get_stylesheet_directory_uri() . '/assets/infinite-marquee/infinite-marquee.bundle.js', array(), '1.0.13', true);
+	wp_enqueue_style('infinite-marquee', get_stylesheet_directory_uri() . '/assets/infinite-marquee/infinite-marquee.min.css', array(), '1.0.13');
+
+	//choices vanilla select
+	wp_enqueue_script('choices', get_stylesheet_directory_uri() . '/assets/choices/choices.min.js', array(), '11.1.0', array('strategy' => 'defer', 'in_footer' => true));
+	wp_enqueue_style('choices', get_stylesheet_directory_uri() . '/assets/choices/choices.min.css', array(), '11.1.0', 'all');
+	wp_enqueue_style('custom-choices', get_stylesheet_directory_uri() . '/assets/choices/custom-choices.css', array(), '0.0.01' . $version, 'all');
 
     // Micromodal popups
     wp_enqueue_script('micromodal', get_stylesheet_directory_uri() . '/assets/micromodal/micromodal.min.js', array(), '0.4.10', true);
-
-    // Dynamic mobile menu
-    wp_enqueue_script('mmenu-light', get_stylesheet_directory_uri() . '/assets/mmenu/mmenu-light.min.js', array(), '3.2.2', true);
-    wp_enqueue_style('mmenu-light', get_stylesheet_directory_uri() . '/assets/mmenu/mmenu-light.css', array(), '3.2.2');
 
     // Readsmore functionality
     wp_enqueue_script('readsmore', get_stylesheet_directory_uri() . '/assets/readsmore/index.umd.js', array(), '2.5.1', true);
@@ -32,12 +35,11 @@ function base_enqueue_scripts_styles() {
 
     // Main stylesheet
     wp_dequeue_style('generate-child');
-    wp_enqueue_style('theme-style', get_stylesheet_directory_uri() . '/style.css', array(), '1.0.6');
+    wp_enqueue_style('theme-style', get_stylesheet_directory_uri() . '/style.css', array(), '1.0.92');
 
     // Remove unused scripts
-    wp_dequeue_script('generate-offside');
-    wp_deregister_script('generate-offside');
     wp_dequeue_script('jquery-migrate');
+
 }
 add_action('wp_enqueue_scripts', 'base_enqueue_scripts_styles'); 
 
@@ -199,6 +201,9 @@ add_filter('post_class', 'include_custom_article_classes');
 //include custom functions for hooks
 include_once('includes/function-hooks.php');
 
+//include new developments file for redirect and url rewriting
+include_once('includes/new-developments.php');
+
 //generatepress svg icons 
 add_filter( 'generate_svg_icon', function( $output, $icon ) {
 	
@@ -207,7 +212,11 @@ add_filter( 'generate_svg_icon', function( $output, $icon ) {
 	}
 
 	if('menu-bars' === $icon) {
-		$output = '<svg width="29" height="20" viewBox="0 0 29 20" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M2.16251 8.67596C1.33408 8.67596 0.662506 9.34754 0.662506 10.176C0.662506 11.0044 1.33408 11.676 2.16251 11.676V8.67596ZM26.9541 11.676C27.7826 11.676 28.4541 11.0044 28.4541 10.176C28.4541 9.34754 27.7826 8.67596 26.9541 8.67596V11.676ZM2.16251 0.509277C1.33408 0.509277 0.662506 1.18085 0.662506 2.00928C0.662506 2.8377 1.33408 3.50928 2.16251 3.50928V0.509277ZM18.6897 3.50928C19.5181 3.50928 20.1897 2.8377 20.1897 2.00928C20.1897 1.18085 19.5181 0.509277 18.6897 0.509277V3.50928ZM2.16251 16.8426C1.33408 16.8426 0.662506 17.5142 0.662506 18.3426C0.662506 19.171 1.33408 19.8426 2.16251 19.8426V16.8426ZM18.6897 19.8426C19.5181 19.8426 20.1897 19.171 20.1897 18.3426C20.1897 17.5142 19.5181 16.8426 18.6897 16.8426V19.8426ZM2.16251 11.676H26.9541V8.67596H2.16251V11.676ZM2.16251 3.50928H18.6897V0.509277H2.16251V3.50928ZM2.16251 19.8426H18.6897V16.8426H2.16251V19.8426Z" fill="#ffffffff"/></svg>';
+		$output = '<svg width="26" height="21" viewBox="0 0 26 21" fill="none" xmlns="http://www.w3.org/2000/svg">
+					<rect width="26" height="3" fill="#DADADA"/>
+					<rect y="9" width="26" height="3" fill="#DADADA"/>
+					<rect y="18" width="26" height="3" fill="#DADADA"/>
+					</svg>';
 	}
 	
     return $output;
@@ -316,27 +325,37 @@ add_shortcode('property_filter', 'property_filter_shortcode');
 add_action('pre_get_posts', function($query) {
     if (!is_admin() && $query->is_main_query()) {
 
-        // Force homepage to only show properties
-        if ($query->is_home()) {
-            $query->set('post_type', 'property'); // your CPT slug
-            $query->set('posts_per_page', 9);     // adjust as needed
+        // Homepage should show properties
+        if ($query->is_front_page()) {
+            $query->set('post_type', 'property'); // CPT slug
+            $query->set('posts_per_page', 9);     // homepage grid
         }
 
-        // Apply filters on archive and homepage
+        // Apply filters on archive + homepage
         if ($query->is_post_type_archive('property') || $query->is_home()) {
 
             $meta_query = [];
+            $tax_query  = [];
 
             // Locations (taxonomy)
             if (!empty($_GET['locations'])) {
-                $query->set('tax_query', [[
+                $tax_query[] = [
                     'taxonomy' => 'locations',
                     'field'    => 'slug',
-                    'terms'    => sanitize_text_field($_GET['locations'])
-                ]]);
+                    'terms'    => sanitize_text_field($_GET['locations']),
+                ];
             }
 
-            // Bedrooms
+            // Property type (taxonomy)
+            if (!empty($_GET['property-type'])) {
+                $tax_query[] = [
+                    'taxonomy' => 'property-type',
+                    'field'    => 'slug',
+                    'terms'    => sanitize_text_field($_GET['property-type']),
+                ];
+            }
+
+            // Bedrooms (ACF field)
             if (!empty($_GET['bedrooms'])) {
                 $meta_query[] = [
                     'key'     => 'bedrooms',
@@ -345,15 +364,16 @@ add_action('pre_get_posts', function($query) {
                 ];
             }
 
-            // Reference Number
+            // Reference Number (ACF field)
             if (!empty($_GET['reference_number'])) {
                 $meta_query[] = [
-                    'key'   => 'reference_number',
-                    'value' => sanitize_text_field($_GET['reference_number']),
+                    'key'     => 'reference_number',
+                    'value'   => sanitize_text_field($_GET['reference_number']),
+                    'compare' => 'LIKE'
                 ];
             }
 
-            // Min Price
+            // Min Price (ACF field)
             if (!empty($_GET['price_min'])) {
                 $meta_query[] = [
                     'key'     => 'for_sale_price',
@@ -363,7 +383,7 @@ add_action('pre_get_posts', function($query) {
                 ];
             }
 
-            // Max Price
+            // Max Price (ACF field)
             if (!empty($_GET['price_max'])) {
                 $meta_query[] = [
                     'key'     => 'for_sale_price',
@@ -373,12 +393,18 @@ add_action('pre_get_posts', function($query) {
                 ];
             }
 
+            if (!empty($tax_query)) {
+                $query->set('tax_query', $tax_query);
+            }
             if (!empty($meta_query)) {
                 $query->set('meta_query', $meta_query);
             }
+
+            $query->set('posts_per_page', 12);
         }
     }
 });
+
 
 
 
