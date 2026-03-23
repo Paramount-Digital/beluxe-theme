@@ -24,6 +24,10 @@ get_header(); ?>
 			// Use the property-listings.php template to display all properties
 			include locate_template('elements/property-listings.php');
 
+			include locate_template('elements/below-property-content.php');
+
+			include locate_template('elements/location-faqs.php');
+
 			/**
 			 * generate_after_main_content hook.
 			 *

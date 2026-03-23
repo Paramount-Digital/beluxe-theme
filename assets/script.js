@@ -10,31 +10,108 @@ document.addEventListener(
 			} 
 		}, 200);
 
-        //initialise Choices for select elements
-        if(typeof Choices != 'undefined') {
+		 //initialise Choices for select elements
+		if(typeof Choices != 'undefined') {
+			// Change placeholder text for phone prefix select to "Prefix"
+			const phonePrefixSelect = document.querySelector('.phone-wrapper [data-name="phone-prefix"] select, .phone-wrapper [data-name="prone-prefix"] select');
+			if (phonePrefixSelect) {
+				const placeholderOpt =
+					phonePrefixSelect.querySelector('option[value=""], option[disabled][selected], option[disabled][value=""]')
+					|| phonePrefixSelect.options[0];
+				if (placeholderOpt) {
+					placeholderOpt.textContent = 'Prefix';
+				}
+			}
 
-            // Change placeholder text for phone prefix select to "Prefix"
-            const phonePrefixSelect = document.querySelector('.phone-wrapper [data-name="phone-prefix"] select, .phone-wrapper [data-name="prone-prefix"] select');
-            if (phonePrefixSelect) {
-                const placeholderOpt =
-                    phonePrefixSelect.querySelector('option[value=""], option[disabled][selected], option[disabled][value=""]')
-                    || phonePrefixSelect.options[0];
-                if (placeholderOpt) {
-                    placeholderOpt.textContent = 'Prefix';
-                }
-            }
-            
-            const select_elements = document.querySelectorAll('select');
+			// Init sort dropdown separately with search disabled
+			const sortSelect = document.getElementById('property-sort');
+			if (sortSelect) {
+				new Choices(sortSelect, {
+					searchEnabled: false,
+					shouldSort: false,
+				});
+				sortSelect.addEventListener('change', function() {
+					this.closest('form').submit();
+				});
+			}
 
-            //apply Choices to all select elements
-            select_elements?.forEach(select => {
-                new Choices(select, {
-                    searchEnabled: true,
-                    searchPlaceholderValue: 'Search...',
-                });
-            });
+			// Features: single-select pill with multi-select behaviour via hidden inputs
+			const featuresSelect = document.getElementById('property-features');
+			if (featuresSelect) {
+				const form = featuresSelect.closest('form');
+				let selectedFeatures = Array.from(
+					form.querySelectorAll('input[name="features[]"]')
+				).map(i => i.value).filter(Boolean);
 
-        }
+				const featuresChoices = new Choices(featuresSelect, {
+					searchEnabled: false,
+					shouldSort: false,
+					itemSelectText: '',
+				});
+
+				function updateFeaturesLabel() {
+					const opts = featuresSelect.options;
+					const labels = selectedFeatures.map(val => {
+						const opt = Array.from(opts).find(o => o.value === val);
+						return opt ? opt.text : val;
+					});
+					if (labels.length === 0) {
+						featuresChoices.setChoiceByValue('');
+					} else if (labels.length === 1) {
+						featuresChoices.setChoiceByValue(selectedFeatures[0]);
+					} else {
+						const inner = featuresSelect.closest('.choices');
+						if (inner) {
+							const span = inner.querySelector('.choices__item--selectable');
+							if (span) span.textContent = labels[0] + ' +' + (labels.length - 1);
+						}
+					}
+				}
+
+				updateFeaturesLabel();
+
+				featuresSelect.addEventListener('change', function() {
+					const val = this.value;
+					if (!val) {
+						selectedFeatures = [];
+					} else if (selectedFeatures.includes(val)) {
+						selectedFeatures = selectedFeatures.filter(f => f !== val);
+					} else {
+						selectedFeatures.push(val);
+					}
+
+					form.querySelectorAll('input[name="features[]"]').forEach(i => i.remove());
+
+					selectedFeatures.forEach(f => {
+						const hidden = document.createElement('input');
+						hidden.type = 'hidden';
+						hidden.name = 'features[]';
+						hidden.value = f;
+						form.appendChild(hidden);
+					});
+
+					updateFeaturesLabel();
+					setTimeout(() => form.submit(), 50);
+				});
+			}
+
+			const select_elements = document.querySelectorAll('select');
+			//apply Choices to all select elements
+			select_elements?.forEach(select => {
+				// Skip selects already initialised above
+				if (select.id === 'property-sort' || select.id === 'property-features') return;
+
+				// Check if this is a price dropdown
+				const isPriceSelect = select.name === 'price_min' || select.name === 'price_max';
+
+				new Choices(select, {
+					searchEnabled: true,
+					searchPlaceholderValue: 'Search...',
+					shouldSort: isPriceSelect ? false : true,  // Don't sort price dropdowns
+				});
+			});
+
+		}
 
 		// close all details elements on click
 		const details_elements = document.querySelectorAll('details');
@@ -178,7 +255,7 @@ document.addEventListener(
 					speed: 25000,
 					smoothEdges: false,
 					direction: 'right',
-					gap: '10px',
+					gap: '20px',
 					duplicateCount: -1,
 					duplicateInnerElements: false,
 					mobileSettings: {
@@ -225,4 +302,11 @@ document.addEventListener(
 				if (e.target === modal) modal.classList.remove('active');
 				};
 			}
+
+			const cards = document.querySelectorAll('.property-card');
+			cards.forEach((card, i) => {
+				setTimeout(() => {
+				card.classList.add('visible');
+				}, i * 150); // stagger left to right
+			});
 	});

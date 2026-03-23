@@ -2,18 +2,49 @@
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
+
+global $wp_query;
+$current_sort = isset($_GET['sortby']) ? sanitize_text_field($_GET['sortby']) : 'recent';
 ?>
 
 <section class="property-listings">
 	<div class="container">
 
 		<?php if ( have_posts() ) : ?>
+
+			<div class="col-12 property-listing-header">
+				<span class="property-count"><?php echo esc_html( $wp_query->found_posts ); ?> Properties</span>
+
+				<div class="property-sort-wrap">
+					<label class="property-sort-label" for="property-sort">Sort By</label>
+					<form class="property-sort-form" method="GET" action="<?php echo esc_url( strtok( $_SERVER['REQUEST_URI'], '?' ) ); ?>">
+						<?php
+						foreach ( $_GET as $key => $value ) {
+							if ( $key === 'sortby' ) {
+								continue;
+							}
+							echo '<input type="hidden" name="' . esc_attr( $key ) . '" value="' . esc_attr( $value ) . '">';
+						}
+						?>
+						<select name="sortby" id="property-sort">
+							<option value="recent" <?php selected( $current_sort, 'recent' ); ?>>Recently Added</option>
+							<option value="price_asc" <?php selected( $current_sort, 'price_asc' ); ?>>Price: Low to High</option>
+							<option value="price_desc" <?php selected( $current_sort, 'price_desc' ); ?>>Price: High to Low</option>
+						</select>
+						<noscript><input type="submit" value="Sort" /></noscript>
+					</form>
+				</div>
+			</div>
+
 			<div class="col-12 property-grid">
 				<?php while ( have_posts() ) : the_post(); ?>
 					<div class="property-card">
-						<?php if ( has_post_thumbnail() ) : ?>
+						<?php 
+						$featured_image = get_property_featured_image(get_the_ID(), 'full');
+						if ( $featured_image ) : 
+						?>
 							<div class="property-listing-image">
-								<?php the_post_thumbnail('medium'); ?>
+								<?php echo $featured_image; ?>
 							</div>
 						<?php endif; ?>
 
@@ -85,9 +116,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 							<div class="property-link-container">
 								<a href="<?php the_permalink(); ?>" class="property-link">View Property</a>
-								<svg xmlns="http://www.w3.org/2000/svg" width="21" height="12" viewBox="0 0 21 12" fill="none">
-									<path d="M20.5303 6.53033C20.8232 6.23744 20.8232 5.76256 20.5303 5.46967L15.7574 0.696699C15.4645 0.403806 14.9896 0.403806 14.6967 0.696699C14.4038 0.989593 14.4038 1.46447 14.6967 1.75736L18.9393 6L14.6967 10.2426C14.4038 10.5355 14.4038 11.0104 14.6967 11.3033C14.9896 11.5962 15.4645 11.5962 15.7574 11.3033L20.5303 6.53033ZM0 6V6.75H20V6V5.25H0V6Z" fill="#0E192F"/>
-								</svg>
 							</div>
 						</div>
 					</div>

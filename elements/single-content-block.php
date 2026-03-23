@@ -5,7 +5,7 @@ if ( ! defined( 'ABSPATH' ) ) exit;
 ?>
 <section class="single-content-block">
     <div class="container">
-        <div class="content-block-inner">
+        <div class="content-block-inner col-12">
             <?php 
             $content = get_sub_field('element_content');
             if ($content) {

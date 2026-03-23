@@ -47,23 +47,23 @@ class InfiniteMarquee {
     }
     init() {
         if ('undefined' == typeof window && 'undefined' == typeof document || !(Array.isArray(this.element) ? this.element.length > 0 : this.element))
-            this.debugging && console.error('🚊 Infinite Marquee - Failed to Initialize');
+            this.debugging && console.error('Infinite Marquee - Failed to Initialize');
         else {
-            if (this.debugging && console.log('🚊 Infinite Marquee - Initialized'),
+            if (this.debugging && console.log('Infinite Marquee - Initialized'),
             window.matchMedia('(prefers-reduced-motion: reduce)').matches && (this.animateMotion = !1,
-            this.debugging && console.log('🚊 Infinite Marquee - "prefers-reduced-motion" is Reduced')),
+            this.debugging && console.log('Infinite Marquee - "prefers-reduced-motion" is Reduced')),
             'function' == typeof this.on.beforeInit && this.on.beforeInit(),
             Array.isArray(this.element)) {
                 this.isMarqueeInitialized = !0;
                 for (const e of this.element)
                     this.configureChildNodes(e),
                     this.configureAnimationOptions(e);
-                this.debugging && console.log('🚊 Infinite Marquee - DOM Nodes Created from Array')
+                this.debugging && console.log('Infinite Marquee - DOM Nodes Created from Array')
             } else
                 this.isMarqueeInitialized = !0,
                 this.configureChildNodes(this.element),
                 this.configureAnimationOptions(this.element),
-                this.debugging && console.log('🚊 Infinite Marquee - DOM Nodes Created from Single Element');
+                this.debugging && console.log('Infinite Marquee - DOM Nodes Created from Single Element');
             'function' == typeof this.on.afterInit && this.on.afterInit()
         }
     }
@@ -75,7 +75,7 @@ class InfiniteMarquee {
         e.appendChild(t),
         this.duplicateInnerElements && this.duplicateOriginalNodes(t),
         this.duplicateContainer(e),
-        this.debugging && console.log('🚊 Infinite Marquee - DOM Nodes Appended Successfully')
+        this.debugging && console.log('Infinite Marquee - DOM Nodes Appended Successfully')
     }
     duplicateOriginalNodes(e) {
         const t = e.children
@@ -87,7 +87,7 @@ class InfiniteMarquee {
         }
         for (const t of i)
             e.appendChild(t);
-        this.debugging && console.log('🚊 Infinite Marquee - DOM Nodes Duplicated Successfully')
+        this.debugging && console.log('Infinite Marquee - DOM Nodes Duplicated Successfully')
     }
     duplicateContainer(e) {
         const t = e.querySelector(`.${this.scrollType}-marquee-inner`)
@@ -136,8 +136,8 @@ class InfiniteMarquee {
                     e.style.setProperty('--_containerWidth', s ? `${this.fullContainerWidth}%` : '')
                 }
                 window.innerWidth >= this.desktopBreakpoint && this.pauseOnHover && this.animateMotion && i(e),
-                this.debugging && console.log(`🚊 Infinite Marquee - ${this.scrollType} type`),
-                this.debugging && console.log('🚊 Infinite Marquee - Animation Configs Ready')
+                this.debugging && console.log(`Infinite Marquee - ${this.scrollType} type`),
+                this.debugging && console.log('Infinite Marquee - Animation Configs Ready')
             }
         }
         ;
@@ -153,7 +153,7 @@ class InfiniteMarquee {
     manageMarquee(e, t) {
         this.isMarqueeInitialized && (this.destroy(e, t),
         this.isMarqueeInitialized = !1,
-        this.debugging && console.log('🚊 Infinite Marquee - Destroyed Successfully'))
+        this.debugging && console.log('Infinite Marquee - Destroyed Successfully'))
     }
     removeClassesAfter(e, t) {
         if (t && t.classList) {
@@ -189,12 +189,12 @@ class InfiniteMarquee {
     }
     pause(e) {
         (e || this.element).classList.add('paused'),
-        this.debugging && console.log('🚊 Infinite Marquee - Animation Paused'),
+        this.debugging && console.log('Infinite Marquee - Animation Paused'),
         'function' == typeof this.on.pauseAnimation && this.on.pauseAnimation()
     }
     resume(e) {
         (e || this.element).classList.remove('paused'),
-        this.debugging && console.log('🚊 Infinite Marquee - Animation Resumed'),
+        this.debugging && console.log('Infinite Marquee - Animation Resumed'),
         'function' == typeof this.on.resumeAnimation && this.on.resumeAnimation()
     }
     debounce(e, t=300) {

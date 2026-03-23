@@ -13,7 +13,10 @@ $fields = [
 ];
 
 // Context overrides
-if ( is_post_type_archive() ) {
+
+if ( is_post_type_archive( 'developments' ) ) {
+  $fields['content'] = '<h1>New Developments</h1>';
+} elseif ( is_post_type_archive() ) {
   $fields['content'] = '<h1>' . post_type_archive_title( '', false ) . '</h1>';
 } elseif ( is_singular( 'post' ) ) {
   $fields['content'] = '<h1>' . get_the_title() . '</h1>';
@@ -38,6 +41,9 @@ if ( is_post_type_archive() ) {
     $term = get_queried_object();
     $fields['sizing'] = 'small-banner';
     $fields['content'] = '<h1>' . esc_html( $term->name ) . '</h1>';
+    if ( ! empty( $term->description ) ) {
+        $fields['content'] .= '<div class="location-description">' . wp_kses_post( wpautop( $term->description ) ) . '</div>';
+    }
 } elseif ( is_home()) {
     $fields['sizing'] = 'small-banner';
     $fields['content'] = '<h1>Blog</h1>';
@@ -114,9 +120,19 @@ $classes = array_filter([
 
       <?php
       //Background media
-      $bg_id = !empty($fields['media']['background_image'])
-          ? $fields['media']['background_image']
-          : (get_post_thumbnail_id($page_id) ?: get_site_url() . '/wp-content/uploads/2025/07/home-hero.jpg');
+      // For properties, check external gallery first
+      if (is_singular('property')) {
+        $external_url = get_property_featured_image_url($page_id);
+        if ($external_url) {
+          $bg_id = $external_url; // Use the URL directly
+        } else {
+          $bg_id = get_post_thumbnail_id($page_id) ?: get_site_url() . '/wp-content/uploads/2025/07/home-hero.jpg';
+        }
+      } else {
+        $bg_id = !empty($fields['media']['background_image'])
+            ? $fields['media']['background_image']
+            : (get_post_thumbnail_id($page_id) ?: get_site_url() . '/wp-content/uploads/2025/07/home-hero.jpg');
+      }
       $mobile_id = $fields['media']['mobile_background_image'] ?? 0;
 
       if ( $bg_id ) :

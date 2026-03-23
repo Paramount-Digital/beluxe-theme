@@ -187,8 +187,10 @@ $price_options  = build_price_scale($max_site_price);
             const form = this.closest('form');
             form.reset();
 
-            // Reload the page without any query parameters
-            window.location.href = window.location.pathname;
+            // Reload the page without any query parameters only if there are parameters
+            if (window.location.search.length > 1) {
+                window.location.href = window.location.pathname;
+            }
         };
         </script>
     </form>
@@ -221,16 +223,17 @@ $price_options  = build_price_scale($max_site_price);
             }
             ?>
         </select>
+		
+		<!-- Min Price -->
+		<select name="price_min" class="min-price">
+			<option value="">Min Price</option>
+			<?php foreach ($price_options as $price): ?>
+				<option value="<?php echo esc_attr($price); ?>" <?php selected((string)$selected_min, (string)$price); ?>>
+					€<?php echo number_format($price); ?>
+				</option>
+			<?php endforeach; ?>
+		</select>
 
-        <!-- Min Price -->
-        <select name="price_min">
-            <option value="">Min Price</option>
-            <?php foreach ($price_options as $price): ?>
-                <option value="<?php echo esc_attr($price); ?>" <?php selected((string)$selected_min, (string)$price); ?>>
-                    <?php echo number_format($price); ?>
-                </option>
-            <?php endforeach; ?>
-        </select>
 
         <button type="button" id="reset-filter1">Reset Filters</button>
         <script>
@@ -238,8 +241,10 @@ $price_options  = build_price_scale($max_site_price);
             const form = this.closest('form');
             form.reset();
 
-            // Reload the page without any query parameters
-            window.location.href = window.location.pathname;
+            // Reload the page without any query parameters only if there are parameters
+            if (window.location.search.length > 1) {
+                window.location.href = window.location.pathname;
+            }
         };
         </script>
 
@@ -256,15 +261,15 @@ $price_options  = build_price_scale($max_site_price);
         <!-- Reference Number -->
         <input type="text" name="reference_number" placeholder="Reference Number" value="<?php echo esc_attr($selected_ref); ?>">
 
-        <!-- Max Price -->
-        <select name="price_max">
-            <option value="">Max Price</option>
-            <?php foreach ($price_options as $price): ?>
-                <option value="<?php echo esc_attr($price); ?>" <?php selected((string)$selected_max, (string)$price); ?>>
-                    <?php echo number_format($price); ?>
-                </option>
-            <?php endforeach; ?>
-        </select>
+		<!-- Max Price -->
+		<select name="price_max" class="max-price">
+			<option value="">Max Price</option>
+			<?php foreach ($price_options as $price): ?>
+				<option value="<?php echo esc_attr($price); ?>" <?php selected((string)$selected_max, (string)$price); ?>>
+					€<?php echo number_format($price); ?>
+				</option>
+			<?php endforeach; ?>
+		</select>
         <button type="submit">Search Properties</button>
     </form>
 </div>

@@ -630,7 +630,7 @@
                                 "class": "",
                                 "id": ""
                             },
-                            "message": "This block will display the location slider, the location slider shows up to 20 of the location names from the Properties > <a href=\"https:\/\/beluxeproperties.kinsta.cloud\/wp-admin\/edit-tags.php?taxonomy=locations&post_type=property\">Locations taxonomy<\/a>.",
+                            "message": "This block will display the location slider, the location slider shows up to 20 of the location names from the Properties > <a href=\"https:\/\/beluxeproperties.com\/wp-admin\/edit-tags.php?taxonomy=locations&post_type=property\">Locations taxonomy<\/a>.",
                             "new_lines": "wpautop",
                             "esc_html": 0
                         }
@@ -905,6 +905,40 @@
                             "layout": "block",
                             "prefix_label": 0,
                             "prefix_name": 0
+                        },
+                        {
+                            "key": "field_68b552cebe09b",
+                            "label": "Property Selection",
+                            "name": "property_selection",
+                            "aria-label": "",
+                            "type": "relationship",
+                            "instructions": "",
+                            "required": 0,
+                            "conditional_logic": 0,
+                            "wrapper": {
+                                "width": "",
+                                "class": "",
+                                "id": ""
+                            },
+                            "post_type": [
+                                "property"
+                            ],
+                            "post_status": [
+                                "publish"
+                            ],
+                            "taxonomy": "",
+                            "filters": [
+                                "search",
+                                "post_type",
+                                "taxonomy"
+                            ],
+                            "return_format": "object",
+                            "min": "",
+                            "max": "",
+                            "allow_in_bindings": 0,
+                            "elements": "",
+                            "bidirectional": 0,
+                            "bidirectional_target": []
                         }
                     ],
                     "min": "",
@@ -973,6 +1007,114 @@
                     ],
                     "min": "",
                     "max": ""
+                },
+                "layout_692811dde3928": {
+                    "key": "layout_692811dde3928",
+                    "name": "faqs_section",
+                    "label": "FAQs Section",
+                    "display": "block",
+                    "sub_fields": [
+                        {
+                            "key": "field_692812cdd18db",
+                            "label": "FAQs",
+                            "name": "faqs",
+                            "aria-label": "",
+                            "type": "repeater",
+                            "instructions": "",
+                            "required": 0,
+                            "conditional_logic": 0,
+                            "wrapper": {
+                                "width": "",
+                                "class": "",
+                                "id": ""
+                            },
+                            "layout": "table",
+                            "min": 0,
+                            "max": 0,
+                            "collapsed": "",
+                            "button_label": "Add Row",
+                            "rows_per_page": 20,
+                            "sub_fields": [
+                                {
+                                    "key": "field_692812ded18dc",
+                                    "label": "Question",
+                                    "name": "question",
+                                    "aria-label": "",
+                                    "type": "text",
+                                    "instructions": "",
+                                    "required": 0,
+                                    "conditional_logic": 0,
+                                    "wrapper": {
+                                        "width": "",
+                                        "class": "",
+                                        "id": ""
+                                    },
+                                    "default_value": "",
+                                    "maxlength": "",
+                                    "allow_in_bindings": 0,
+                                    "placeholder": "",
+                                    "prepend": "",
+                                    "append": "",
+                                    "parent_repeater": "field_692812cdd18db"
+                                },
+                                {
+                                    "key": "field_692812f0d18dd",
+                                    "label": "Answer",
+                                    "name": "answer",
+                                    "aria-label": "",
+                                    "type": "wysiwyg",
+                                    "instructions": "",
+                                    "required": 0,
+                                    "conditional_logic": 0,
+                                    "wrapper": {
+                                        "width": "",
+                                        "class": "",
+                                        "id": ""
+                                    },
+                                    "default_value": "",
+                                    "allow_in_bindings": 0,
+                                    "tabs": "all",
+                                    "toolbar": "full",
+                                    "media_upload": 1,
+                                    "delay": 0,
+                                    "parent_repeater": "field_692812cdd18db"
+                                },
+                                {
+                                    "key": "field_692812fcd18de",
+                                    "label": "Category",
+                                    "name": "category",
+                                    "aria-label": "",
+                                    "type": "select",
+                                    "instructions": "",
+                                    "required": 0,
+                                    "conditional_logic": 0,
+                                    "wrapper": {
+                                        "width": "",
+                                        "class": "",
+                                        "id": ""
+                                    },
+                                    "choices": {
+                                        "general": "General",
+                                        "for-buyers": "For Buyers",
+                                        "for-sellers": "For Sellers"
+                                    },
+                                    "default_value": false,
+                                    "return_format": "value",
+                                    "multiple": 0,
+                                    "allow_null": 0,
+                                    "allow_in_bindings": 0,
+                                    "ui": 0,
+                                    "ajax": 0,
+                                    "placeholder": "",
+                                    "create_options": 0,
+                                    "save_options": 0,
+                                    "parent_repeater": "field_692812cdd18db"
+                                }
+                            ]
+                        }
+                    ],
+                    "min": "",
+                    "max": ""
                 }
             },
             "min": "",
@@ -998,5 +1140,6 @@
     "active": true,
     "description": "",
     "show_in_rest": 0,
-    "modified": 1756369909
+    "display_title": "",
+    "modified": 1764234881
 }

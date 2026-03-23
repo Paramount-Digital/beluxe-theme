@@ -17,11 +17,16 @@ if ( have_rows( 'property_slider' ) ) {
            continue;
        }
        $description = get_sub_field( 'description' );
-       $thumb_id    = get_post_thumbnail_id( $prop->ID );
+       
+       // Check for external gallery first
+       $external_url = get_property_featured_image_url( $prop->ID );
+       $thumb_id    = $external_url ? $external_url : get_post_thumbnail_id( $prop->ID );
+       
        $price       = get_field( 'for_sale_price', $prop->ID );
        $link        = get_permalink( $prop->ID );
        $slides[]    = [
            'thumb_id'    => $thumb_id,
+           'is_external' => !empty($external_url),
            'description' => $description,
            'price'       => $price,
            'link'        => $link,
@@ -35,7 +40,15 @@ if ( ! empty( $slides ) ) : ?>
                 <div class="swiper-wrapper">
                     <?php foreach ( $slides as $slide ) : ?>
                         <div class="swiper-slide property-slide">
-                            <?php if ( ! empty( $slide['thumb_id'] ) ) { echo wp_get_attachment_image( $slide['thumb_id'], 'full' ); } ?>
+                            <?php 
+                            if ( ! empty( $slide['thumb_id'] ) ) {
+                                if ( $slide['is_external'] ) {
+                                    echo '<img src="' . esc_url( $slide['thumb_id'] ) . '" alt="Property Image" />';
+                                } else {
+                                    echo wp_get_attachment_image( $slide['thumb_id'], 'full' );
+                                }
+                            }
+                            ?>
                             <div class="container">
                                 <div class="property-slider-content dark-gold">
                                     <?php echo wp_kses_post( $slide['description'] ); ?>

@@ -68,7 +68,7 @@ get_header(); ?>
 
         <div class="col-12 col-lg-6 property-left">
 
-            <h2 class="property-content-title">Luxury Villas in <?php echo esc_html($first_location); ?></h2>
+<!--             <h2 class="property-content-title">Luxury Villas in </?ph/p echo esc_html($first_location); ?/></h2> -->
             <p class="property-content-p"><?php echo the_content(); ?></p>
 
         </div>
@@ -102,28 +102,59 @@ get_header(); ?>
 
     <div class="container">
 
-        <?php $gallery = get_field('property_gallery'); ?>
-        <?php if ($gallery && is_array($gallery)) : ?>
-        <div class="property-gallery-swiper swiper">
-            <div class="swiper-wrapper">
-                <?php foreach ($gallery as $image) : ?>
-                    <div class="swiper-slide">
-                        <img src="<?php echo esc_url($image['url']); ?>" alt="<?php echo esc_attr($image['alt']); ?>" style="width:100%;height:auto;" />
-                    </div>
-                <?php endforeach; ?>
+        <?php 
+        // Check for external gallery first (comma-separated URLs), fallback to property_gallery
+        $external_gallery_raw = get_field('external_property_gallery');
+        $gallery = get_field('property_gallery');
+        
+        // Parse external gallery URLs if it's a string
+        $external_gallery_urls = [];
+        if (!empty($external_gallery_raw) && is_string($external_gallery_raw)) {
+            $urls = preg_split('/[,\r\n]+/', $external_gallery_raw, -1, PREG_SPLIT_NO_EMPTY);
+            $external_gallery_urls = array_map('trim', array_filter($urls));
+        }
+        
+        $use_external = !empty($external_gallery_urls);
+        ?>
+        
+        <?php if ($use_external || ($gallery && is_array($gallery))) : ?>
+            <div class="property-gallery-swiper swiper">
+                <div class="swiper-wrapper">
+                    <?php if ($use_external) : ?>
+                        <?php foreach ($external_gallery_urls as $url) : ?>
+                            <div class="swiper-slide">
+                                <img src="<?php echo esc_url($url); ?>" alt="Property Image"/>
+                            </div>
+                        <?php endforeach; ?>
+                    <?php else : ?>
+                        <?php foreach ($gallery as $image) : ?>
+                            <div class="swiper-slide">
+                                <img src="<?php echo esc_url($image['url']); ?>" alt="<?php echo esc_attr($image['alt']); ?>"/>
+                            </div>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
+                </div>
             </div>
-        </div>
-        <!-- Thumbnails -->
-        <div class="property-gallery-thumbs swiper">
-            <div class="swiper-wrapper">
-                <?php foreach ($gallery as $image) : ?>
-                    <div class="swiper-slide">
-                        <img src="<?php echo esc_url($image['sizes']['thumbnail']); ?>" alt="<?php echo esc_attr($image['alt']); ?>" />
-                    </div>
-                <?php endforeach; ?>
+            <div class="property-gallery-thumbs swiper">
+                <div class="swiper-wrapper">
+                    <?php if ($use_external) : ?>
+                        <?php foreach ($external_gallery_urls as $url) : ?>
+                            <div class="swiper-slide">
+                                <img src="<?php echo esc_url($url); ?>" alt="Property Thumbnail" />
+                            </div>
+                        <?php endforeach; ?>
+                    <?php else : ?>
+                        <?php foreach ($gallery as $image) : ?>
+                            <div class="swiper-slide">
+                                <img src="<?php echo esc_url($image['sizes']['thumbnail']); ?>" alt="<?php echo esc_attr($image['alt']); ?>" />
+                            </div>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
+                </div>
             </div>
-        </div>
         <?php endif; ?>
+
+        
 
     </div>
 
@@ -133,24 +164,18 @@ get_header(); ?>
 get_footer();?>
     
 <script>
+  const thumbsSwiper = new Swiper('.property-gallery-thumbs', {
+    spaceBetween: 10,
+  });
 
-    const thumbsSwiper = new Swiper('.property-gallery-thumbs', {
-        spaceBetween: 10,
-        slidesPerView: 6,
-        freeMode: true,
-        watchSlidesProgress: true,
-    });
-
-    const propertyGallerySwiper = new Swiper('.property-gallery-swiper', {
-        // Optional parameters
-        direction: 'horizontal',
-        loop: true,
-        autoplay: {
-            delay: 5000,
-        },
-        thumbs: {
-            swiper: thumbsSwiper,
-        },
-
-    });
+  const propertyGallerySwiper = new Swiper('.property-gallery-swiper', {
+    direction: 'horizontal',
+    loop: false,              // loop only the main swiper
+    autoplay: {
+      delay: 5000,
+    },
+    thumbs: {
+      swiper: thumbsSwiper,
+    },
+  });
 </script>

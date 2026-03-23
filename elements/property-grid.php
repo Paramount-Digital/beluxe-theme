@@ -5,76 +5,355 @@ if (!defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-$properties = new WP_Query([
-  'post_type'      => 'property',
-  'posts_per_page' => 8,
-  'post_status'    => 'publish',
-  'orderby'        => 'menu_order',
-  'order'          => 'ASC',
-]);
-
 $content = get_sub_field('element_content');
+$current_sort = isset($_GET['sortby']) ? sanitize_text_field($_GET['sortby']) : 'recent';
+
+// Features filter — read from features[] array
+$selected_features = isset($_GET['features']) && is_array($_GET['features'])
+  ? array_map('sanitize_text_field', $_GET['features'])
+  : [];
+
+// Map filter values to search keywords (fuzzy match terms)
+$feature_keywords = [
+  'close_to_golf'   => ['close to golf', 'golf'],
+  'country_view'    => ['country view', 'countryside'],
+  'mountain_view'   => ['mountain view', 'mountain'],
+  'panoramic_view'  => ['panoramic view', 'panoramic'],
+  'sea_view'        => ['sea view'],
+  'gated_community' => ['gated community', 'gated'],
+  'beachside'       => ['beach', 'beachside', 'front line beach'],
+  'balcony'         => ['balcony', 'terrace'],
+  'city_views'      => ['city view', 'urban view', 'city'],
+  'indoor_pool'     => ['indoor pool'],
+  'jacuzzi'         => ['jacuzzi'],
+];
+
+// Helper: check if a post matches all selected features
+function property_matches_features( $post_id, $selected_features, $feature_keywords ) {
+  if ( empty( $selected_features ) ) return true;
+  $rows = get_field( 'key_features', $post_id );
+  if ( empty( $rows ) ) return false;
+  $feature_text = implode( '|', array_column( $rows, 'feature' ) );
+  foreach ( $selected_features as $selected ) {
+    if ( ! isset( $feature_keywords[ $selected ] ) ) continue;
+    $matched = false;
+    foreach ( $feature_keywords[ $selected ] as $keyword ) {
+      if ( stripos( $feature_text, $keyword ) !== false ) {
+        $matched = true;
+        break;
+      }
+    }
+    if ( ! $matched ) return false;
+  }
+  return true;
+}
+
+// Feature options for the select
+$feature_options = [
+  'close_to_golf'   => 'Close to Golf',
+  'country_view'    => 'Country View',
+  'mountain_view'   => 'Mountain View',
+  'panoramic_view'  => 'Panoramic View',
+  'sea_view'        => 'Sea View',
+  'gated_community' => 'Gated Community',
+  'beachside'       => 'Beachside',
+  'balcony'         => 'Balcony',
+  'city_views'      => 'City Views',
+  'indoor_pool'     => 'Indoor Pool',
+  'jacuzzi'         => 'Jacuzzi',
+];
 ?>
 
 <section class="property-listings">
   <div class="container">
     <div class="header-wrapper">
-      <?php echo $content;?>
+      <?php echo $content; ?>
     </div>
-    <?php if ( $properties->have_posts() ) : ?>
+
+    <?php $property_grid = get_sub_field('property_selection'); ?>
+
+    <div class="col-12 property-listing-header">
+      <span class="property-count" id="property-count"></span>
+
+      <form class="property-filter-controls" method="GET" action="<?php echo esc_url( strtok( $_SERVER['REQUEST_URI'], '?' ) ); ?>">
+
+        <?php
+        // Preserve GET params that aren't managed by this form
+        foreach ( $_GET as $key => $value ) {
+          if ( $key === 'sortby' || $key === 'features' ) continue;
+          echo '<input type="hidden" name="' . esc_attr( $key ) . '" value="' . esc_attr( $value ) . '">';
+        }
+        ?>
+
+        <div class="property-filter-group">
+          <label class="property-filter-label">Features</label>
+          <?php foreach ( $selected_features as $f ) : ?>
+            <input type="hidden" name="features[]" value="<?php echo esc_attr( $f ); ?>">
+          <?php endforeach; ?>
+          <select name="feature" id="property-features">
+            <option value="">All Features</option>
+            <?php foreach ( $feature_options as $value => $label ) : ?>
+              <option value="<?php echo esc_attr( $value ); ?>"><?php echo esc_html( $label ); ?></option>
+            <?php endforeach; ?>
+          </select>
+        </div>
+
+        <div class="property-filter-group">
+          <label class="property-filter-label" for="property-sort">Sort By</label>
+          <select name="sortby" id="property-sort">
+            <option value="recent" <?php selected( $current_sort, 'recent' ); ?>>Recently Added</option>
+            <option value="price_asc" <?php selected( $current_sort, 'price_asc' ); ?>>Price: Low to High</option>
+            <option value="price_desc" <?php selected( $current_sort, 'price_desc' ); ?>>Price: High to Low</option>
+          </select>
+        </div>
+
+        <noscript><input type="submit" value="Apply" /></noscript>
+      </form>
+    </div>
+
+    <?php
+    if ( $property_grid ) :
+      // Sort the ACF relationship array based on sortby param
+      if ( $current_sort === 'price_asc' ) {
+        usort( $property_grid, function( $a, $b ) {
+          return (float) get_field( 'for_sale_price', $a->ID ) - (float) get_field( 'for_sale_price', $b->ID );
+        });
+      } elseif ( $current_sort === 'price_desc' ) {
+        usort( $property_grid, function( $a, $b ) {
+          return (float) get_field( 'for_sale_price', $b->ID ) - (float) get_field( 'for_sale_price', $a->ID );
+        });
+      }
+
+      // Filter by selected features
+      if ( ! empty( $selected_features ) ) {
+        $property_grid = array_values( array_filter(
+          $property_grid,
+          function( $p ) use ( $selected_features, $feature_keywords ) {
+            return property_matches_features( $p->ID, $selected_features, $feature_keywords );
+          }
+        ));
+      }
+    ?>
+
+      <script>document.getElementById('property-count').textContent = '<?php echo count( $property_grid ); ?> Properties';</script>
+
       <div class="property-grid col-12">
-        <?php while ( $properties->have_posts() ) : $properties->the_post(); ?>
+        <?php foreach ( $property_grid as $properties ) :
+          $pid = $properties->ID;
+
+          // Core property data
+          $permalink = get_permalink( $pid );
+          $title     = get_the_title( $pid );
+          $excerpt   = get_the_excerpt( $pid );
+          $thumb     = get_property_featured_image( $pid, 'medium' );
+
+          // Location
+          $location_terms = get_the_terms( $pid, 'locations' );
+          $first_location = ( $location_terms && ! is_wp_error( $location_terms ) ) ? $location_terms[0]->name : '';
+
+          // Custom fields
+          $bedrooms   = get_post_meta( $pid, 'bedrooms', true );
+          $bathrooms  = get_post_meta( $pid, 'bathrooms', true );
+          $build_size = get_post_meta( $pid, 'build_size', true );
+          $plot_size  = get_post_meta( $pid, 'plot_size', true );
+
+          $price      = get_field( 'for_sale_price', $pid );
+          $ref_number = get_field( 'reference_number', $pid );
+        ?>
           <div class="property-card">
-            <?php if ( has_post_thumbnail() ) : ?>
+            <?php if ( $thumb ) : ?>
               <div class="property-listing-image">
-                <?php the_post_thumbnail('medium'); ?>
+                <?php echo $thumb; ?>
               </div>
             <?php endif; ?>
+
             <div class="property-content">
-              <?php
-              $location_terms = get_the_terms(get_the_ID(), 'locations');
-              $first_location = $location_terms ? $location_terms[0]->name : '';
-              ?>
-              <p class="property-location"><?php echo esc_html($first_location); ?></p>
-              <a href="<?php the_permalink(); ?>"><h3 class="property-title"><?php the_title(); ?></h3></a>
-              <div class="property-listing-details">
-                <div class="property-listing-detail">
-                  <img src="/wp-content/uploads/2025/08/bed_OFF-8.png" class="listing-icon" alt="Bedrooms Icon">
-                  <p><?php echo get_post_meta(get_the_ID(), 'bedrooms', true); ?></p>
+              <?php if ( $first_location ) : ?>
+                <p class="property-location"><?php echo esc_html( $first_location ); ?></p>
+              <?php endif; ?>
+
+              <a href="<?php echo esc_url( $permalink ); ?>">
+                <h3 class="property-title"><?php echo esc_html( $title ); ?></h3>
+              </a>
+
+              <?php if ( $bedrooms || $bathrooms || $build_size || $plot_size ) : ?>
+                <div class="property-listing-details">
+                  <?php if ( $bedrooms ) : ?>
+                    <div class="property-listing-detail">
+                      <img src="/wp-content/uploads/2025/08/bed_OFF-8.png" class="listing-icon" alt="Bedrooms Icon">
+                      <p><?php echo esc_html( $bedrooms ); ?></p>
+                    </div>
+                  <?php endif; ?>
+                  <?php if ( $bathrooms ) : ?>
+                    <div class="property-listing-detail">
+                      <img src="/wp-content/uploads/2025/08/BATHROOMS_OFF-8.png" class="listing-icon" alt="Bathrooms Icon">
+                      <p><?php echo esc_html( $bathrooms ); ?></p>
+                    </div>
+                  <?php endif; ?>
+                  <?php if ( $build_size ) : ?>
+                    <div class="property-listing-detail">
+                      <img src="/wp-content/uploads/2025/08/HOUSE_OFF-8.png" class="listing-icon" alt="Build Size Icon">
+                      <p><?php echo esc_html( $build_size ); ?>m²</p>
+                    </div>
+                  <?php endif; ?>
+                  <?php if ( $plot_size ) : ?>
+                    <div class="property-listing-detail">
+                      <img src="/wp-content/uploads/2025/08/PLOT_OFF-8.png" class="listing-icon" alt="Plot Size Icon">
+                      <p><?php echo esc_html( $plot_size ); ?>m²</p>
+                    </div>
+                  <?php endif; ?>
                 </div>
-                <div class="property-listing-detail">
-                  <img src="/wp-content/uploads/2025/08/BATHROOMS_OFF-8.png" class="listing-icon" alt="Bathrooms Icon">
-                  <p><?php echo get_post_meta(get_the_ID(), 'bathrooms', true); ?></p>
+              <?php endif; ?>
+
+              <?php if ( $excerpt ) : ?>
+                <p><?php echo esc_html( $excerpt ); ?></p>
+              <?php endif; ?>
+
+              <div class="property-bottom">
+                <div class="property-price-sku">
+                  <?php if ( $price ) : ?>
+                    <p class="listing-card-price">€<?php echo number_format( (float) $price ); ?></p>
+                  <?php endif; ?>
+                  <?php if ( $ref_number ) : ?>
+                    <p class="listing-card-ref"><?php echo esc_html( $ref_number ); ?></p>
+                  <?php endif; ?>
                 </div>
-                <div class="property-listing-detail">
-                  <img src="/wp-content/uploads/2025/08/HOUSE_OFF-8.png" class="listing-icon" alt="Build Size Icon">
-                  <p><?php echo get_post_meta(get_the_ID(), 'build_size', true); ?>m²</p>
+                <div class="property-link-container">
+                  <a href="<?php echo esc_url( $permalink ); ?>" class="property-link">View Property</a>
                 </div>
-                <div class="property-listing-detail">
-                  <img src="/wp-content/uploads/2025/08/PLOT_OFF-8.png" class="listing-icon" alt="Plot Size Icon">
-                  <p><?php echo get_post_meta(get_the_ID(), 'plot_size', true); ?>m²</p>
-                </div>
-              </div>
-              <p><?php echo get_the_excerpt(); ?></p>
-              <div class="property-price-sku">
-                <p class="listing-card-price">€<?php echo number_format(get_field('for_sale_price', get_the_ID())); ?></p>
-                <p class="listing-card-ref"><?php echo get_field('reference_number', get_the_ID()); ?></p>
-              </div>
-              <div class="property-link-container">
-                <a href="<?php the_permalink(); ?>" class="property-link">View Property</a>
-                <svg xmlns="http://www.w3.org/2000/svg" width="21" height="12" viewBox="0 0 21 12" fill="none">
-                  <path d="M20.5303 6.53033C20.8232 6.23744 20.8232 5.76256 20.5303 5.46967L15.7574 0.696699C15.4645 0.403806 14.9896 0.403806 14.6967 0.696699C14.4038 0.989593 14.4038 1.46447 14.6967 1.75736L18.9393 6L14.6967 10.2426C14.4038 10.5355 14.4038 11.0104 14.6967 11.3033C14.9896 11.5962 15.4645 11.5962 15.7574 11.3033L20.5303 6.53033ZM0 6V6.75H20V6V5.25H0V6Z" fill="#0E192F"/>
-                </svg>
               </div>
             </div>
           </div>
-        <?php endwhile; ?>
-    </div>
-    <?php else : ?>
-      <div class="col-12">
-        <p>No properties found. View all of our properties <a href="<?php echo esc_url( home_url( '/properties/' ) ); ?>">here</a>.</p>
+        <?php endforeach; ?>
       </div>
+
+    <?php else : ?>
+      <?php
+      // Fallback: Query all properties for PHP filtering
+      $fallback_args = [
+        'post_type'      => 'property',
+        'posts_per_page' => -1,
+        'post_status'    => 'publish',
+      ];
+
+      // Apply sort to fallback query
+      if ( $current_sort === 'price_asc' ) {
+        $fallback_args['orderby']  = 'meta_value_num';
+        $fallback_args['meta_key'] = 'for_sale_price';
+        $fallback_args['order']    = 'ASC';
+      } elseif ( $current_sort === 'price_desc' ) {
+        $fallback_args['orderby']  = 'meta_value_num';
+        $fallback_args['meta_key'] = 'for_sale_price';
+        $fallback_args['order']    = 'DESC';
+      }
+
+      $fallback_query = new WP_Query( $fallback_args );
+      $fallback_posts = $fallback_query->posts;
+
+      // Filter by selected features
+      if ( ! empty( $selected_features ) ) {
+        $fallback_posts = array_values( array_filter(
+          $fallback_posts,
+          function( $p ) use ( $selected_features, $feature_keywords ) {
+            return property_matches_features( $p->ID, $selected_features, $feature_keywords );
+          }
+        ));
+      }
+      ?>
+
+      <script>document.getElementById('property-count').textContent = '<?php echo count( $fallback_posts ); ?> Properties';</script>
+
+      <?php if ( ! empty( $fallback_posts ) ) : ?>
+        <div class="property-grid col-12">
+          <?php foreach ( $fallback_posts as $property_post ) :
+            $pid = $property_post->ID;
+            $permalink = get_permalink( $pid );
+            $title     = get_the_title( $pid );
+            $excerpt   = get_the_excerpt( $property_post );
+            $thumb     = get_property_featured_image( $pid, 'medium' );
+
+            $location_terms = get_the_terms( $pid, 'locations' );
+            $first_location = ( $location_terms && ! is_wp_error( $location_terms ) ) ? $location_terms[0]->name : '';
+
+            $bedrooms   = get_post_meta( $pid, 'bedrooms', true );
+            $bathrooms  = get_post_meta( $pid, 'bathrooms', true );
+            $build_size = get_post_meta( $pid, 'build_size', true );
+            $plot_size  = get_post_meta( $pid, 'plot_size', true );
+
+            $price      = get_field( 'for_sale_price', $pid );
+            $ref_number = get_field( 'reference_number', $pid );
+          ?>
+            <div class="property-card">
+              <?php if ( $thumb ) : ?>
+                <div class="property-listing-image">
+                  <?php echo $thumb; ?>
+                </div>
+              <?php endif; ?>
+
+              <div class="property-content">
+                <?php if ( $first_location ) : ?>
+                  <p class="property-location"><?php echo esc_html( $first_location ); ?></p>
+                <?php endif; ?>
+
+                <a href="<?php echo esc_url( $permalink ); ?>">
+                  <h3 class="property-title"><?php echo esc_html( $title ); ?></h3>
+                </a>
+
+                <?php if ( $bedrooms || $bathrooms || $build_size || $plot_size ) : ?>
+                  <div class="property-listing-details">
+                    <?php if ( $bedrooms ) : ?>
+                      <div class="property-listing-detail">
+                        <img src="/wp-content/uploads/2025/08/bed_OFF-8.png" class="listing-icon" alt="Bedrooms Icon">
+                        <p><?php echo esc_html( $bedrooms ); ?></p>
+                      </div>
+                    <?php endif; ?>
+                    <?php if ( $bathrooms ) : ?>
+                      <div class="property-listing-detail">
+                        <img src="/wp-content/uploads/2025/08/BATHROOMS_OFF-8.png" class="listing-icon" alt="Bathrooms Icon">
+                        <p><?php echo esc_html( $bathrooms ); ?></p>
+                      </div>
+                    <?php endif; ?>
+                    <?php if ( $build_size ) : ?>
+                      <div class="property-listing-detail">
+                        <img src="/wp-content/uploads/2025/08/HOUSE_OFF-8.png" class="listing-icon" alt="Build Size Icon">
+                        <p><?php echo esc_html( $build_size ); ?>m²</p>
+                      </div>
+                    <?php endif; ?>
+                    <?php if ( $plot_size ) : ?>
+                      <div class="property-listing-detail">
+                        <img src="/wp-content/uploads/2025/08/PLOT_OFF-8.png" class="listing-icon" alt="Plot Size Icon">
+                        <p><?php echo esc_html( $plot_size ); ?>m²</p>
+                      </div>
+                    <?php endif; ?>
+                  </div>
+                <?php endif; ?>
+
+                <?php if ( $excerpt ) : ?>
+                  <p><?php echo esc_html( $excerpt ); ?></p>
+                <?php endif; ?>
+
+                <div class="property-bottom">
+                  <div class="property-price-sku">
+                    <?php if ( $price ) : ?>
+                      <p class="listing-card-price">€<?php echo number_format( (float) $price ); ?></p>
+                    <?php endif; ?>
+                    <?php if ( $ref_number ) : ?>
+                      <p class="listing-card-ref"><?php echo esc_html( $ref_number ); ?></p>
+                    <?php endif; ?>
+                  </div>
+                  <div class="property-link-container">
+                    <a href="<?php echo esc_url( $permalink ); ?>" class="property-link">View Property</a>
+                  </div>
+                </div>
+              </div>
+            </div>
+          <?php endforeach; ?>
+        </div>
+      <?php else : ?>
+        <div class="col-12">
+          <p>No properties match your filters. Please adjust and try again.</p>
+        </div>
+      <?php endif; ?>
     <?php endif; ?>
   </div>
 </section>
-<?php wp_reset_postdata(); ?>
