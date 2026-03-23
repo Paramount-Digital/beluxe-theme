@@ -386,6 +386,44 @@ function property_filter_shortcode() {
 }
 add_shortcode('property_filter', 'property_filter_shortcode');
 
+// Feature keywords map for property feature matching
+function get_feature_keywords() {
+    return [
+        'close_to_golf'   => ['close to golf', 'golf'],
+        'country_view'    => ['country view', 'countryside'],
+        'mountain_view'   => ['mountain view', 'mountain'],
+        'panoramic_view'  => ['panoramic view', 'panoramic'],
+        'sea_view'        => ['sea view'],
+        'gated_community' => ['gated community', 'gated'],
+        'beachside'       => ['beach', 'beachside', 'front line beach'],
+        'balcony'         => ['balcony', 'terrace'],
+        'city_views'      => ['city view', 'urban view', 'city'],
+        'indoor_pool'     => ['indoor pool'],
+        'jacuzzi'         => ['jacuzzi'],
+    ];
+}
+
+// Check if a property matches all selected features
+function property_matches_features_global( $post_id, $selected_features ) {
+    if ( empty( $selected_features ) ) return true;
+    $feature_keywords = get_feature_keywords();
+    $rows = get_field( 'key_features', $post_id );
+    if ( empty( $rows ) ) return false;
+    $feature_text = implode( '|', array_column( $rows, 'feature' ) );
+    foreach ( $selected_features as $selected ) {
+        if ( ! isset( $feature_keywords[ $selected ] ) ) continue;
+        $matched = false;
+        foreach ( $feature_keywords[ $selected ] as $keyword ) {
+            if ( stripos( $feature_text, $keyword ) !== false ) {
+                $matched = true;
+                break;
+            }
+        }
+        if ( ! $matched ) return false;
+    }
+    return true;
+}
+
 add_action('pre_get_posts', function($query) {
     if (!is_admin() && $query->is_main_query()) {
 
@@ -483,6 +521,27 @@ add_action('pre_get_posts', function($query) {
                     $query->set('orderby', 'date');
                     $query->set('order', 'DESC');
                     break;
+            }
+
+            // Feature filtering via post__in (repeater fields can't use meta_query)
+            $selected_features = isset($_GET['features']) && is_array($_GET['features'])
+                ? array_map('sanitize_text_field', $_GET['features'])
+                : [];
+
+            if ( ! empty( $selected_features ) ) {
+                $all_properties = get_posts([
+                    'post_type'      => 'property',
+                    'post_status'    => 'publish',
+                    'posts_per_page' => -1,
+                    'fields'         => 'ids',
+                    'suppress_filters' => true,
+                ]);
+
+                $filtered_ids = array_filter( $all_properties, function( $pid ) use ( $selected_features ) {
+                    return property_matches_features_global( $pid, $selected_features );
+                });
+
+                $query->set( 'post__in', ! empty( $filtered_ids ) ? array_values( $filtered_ids ) : [0] );
             }
         }
     }

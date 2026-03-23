@@ -72,45 +72,6 @@ $feature_options = [
 
     <?php $property_grid = get_sub_field('property_selection'); ?>
 
-    <div class="col-12 property-listing-header">
-      <span class="property-count" id="property-count"></span>
-
-      <form class="property-filter-controls" method="GET" action="<?php echo esc_url( strtok( $_SERVER['REQUEST_URI'], '?' ) ); ?>">
-
-        <?php
-        // Preserve GET params that aren't managed by this form
-        foreach ( $_GET as $key => $value ) {
-          if ( $key === 'sortby' || $key === 'features' ) continue;
-          echo '<input type="hidden" name="' . esc_attr( $key ) . '" value="' . esc_attr( $value ) . '">';
-        }
-        ?>
-
-        <div class="property-filter-group">
-          <label class="property-filter-label">Features</label>
-          <?php foreach ( $selected_features as $f ) : ?>
-            <input type="hidden" name="features[]" value="<?php echo esc_attr( $f ); ?>">
-          <?php endforeach; ?>
-          <select name="feature" id="property-features">
-            <option value="">All Features</option>
-            <?php foreach ( $feature_options as $value => $label ) : ?>
-              <option value="<?php echo esc_attr( $value ); ?>"><?php echo esc_html( $label ); ?></option>
-            <?php endforeach; ?>
-          </select>
-        </div>
-
-        <div class="property-filter-group">
-          <label class="property-filter-label" for="property-sort">Sort By</label>
-          <select name="sortby" id="property-sort">
-            <option value="recent" <?php selected( $current_sort, 'recent' ); ?>>Recently Added</option>
-            <option value="price_asc" <?php selected( $current_sort, 'price_asc' ); ?>>Price: Low to High</option>
-            <option value="price_desc" <?php selected( $current_sort, 'price_desc' ); ?>>Price: High to Low</option>
-          </select>
-        </div>
-
-        <noscript><input type="submit" value="Apply" /></noscript>
-      </form>
-    </div>
-
     <?php
     if ( $property_grid ) :
       // Sort the ACF relationship array based on sortby param

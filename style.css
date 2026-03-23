@@ -2794,6 +2794,72 @@ span.page-numbers.current {
 	backdrop-filter: blur(5px);
 }
 
+/* Feature Pills Row */
+.feature-pills-row {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  overflow: hidden;
+}
+
+.feature-pills-label {
+  font-family: Satoshi, sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  color: #ffffff;
+  letter-spacing: 0.7px;
+  white-space: nowrap;
+}
+
+.feature-pills-track {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  flex: 1;
+  padding-bottom: 2px;
+  cursor: grab;
+}
+
+.feature-pills-track.is-dragging {
+  cursor: grabbing;
+  user-select: none;
+}
+
+.feature-pills-track::-webkit-scrollbar {
+  display: none;
+}
+
+.feature-pill {
+  flex-shrink: 0;
+  background: transparent;
+  border: 1.5px solid rgba(255, 255, 255, 0.6);
+  border-radius: 26px;
+  padding: 8px 18px;
+  font-family: Satoshi, sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  color: #ffffff;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s, color 0.2s;
+  white-space: nowrap;
+}
+
+.feature-pill.is-active {
+  background: #BFA570;
+  border-color: #BFA570;
+  color: #ffffff;
+}
+
+.feature-pill-x {
+  margin-left: 6px;
+  font-size: 15px;
+  line-height: 1;
+}
+
 /* Mobile Modal Trigger Button */
 .filter-modal-trigger {
     display: block;

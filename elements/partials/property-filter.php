@@ -108,6 +108,24 @@ function build_price_scale($max_price) {
 // Build the options once
 $max_site_price = get_max_for_sale_price();
 $price_options  = build_price_scale($max_site_price);
+
+// Feature pill options
+$feature_pill_options = [
+  'close_to_golf'   => 'Close to Golf',
+  'country_view'    => 'Country View',
+  'mountain_view'   => 'Mountain View',
+  'panoramic_view'  => 'Panoramic View',
+  'sea_view'        => 'Sea View',
+  'gated_community' => 'Gated Community',
+  'beachside'       => 'Beachside',
+  'balcony'         => 'Balcony',
+  'city_views'      => 'City Views',
+  'indoor_pool'     => 'Indoor Pool',
+  'jacuzzi'         => 'Jacuzzi',
+];
+$active_features = isset($_GET['features']) && is_array($_GET['features'])
+  ? array_map('sanitize_text_field', $_GET['features'])
+  : [];
 ?>
 
 <div class="col-12 property-filter">
@@ -179,6 +197,28 @@ $price_options  = build_price_scale($max_site_price);
 
         <!-- Reference Number -->
         <input type="text" name="reference_number" placeholder="Reference Number" value="<?php echo esc_attr($selected_ref); ?>">
+
+        <div class="feature-pills-row">
+          <span class="feature-pills-label">Property Features:</span>
+          <div class="feature-pills-track">
+            <?php
+            foreach ( $feature_pill_options as $value => $label ) :
+              $is_active = in_array($value, $active_features, true);
+            ?>
+              <button type="button"
+                class="feature-pill<?php echo $is_active ? ' is-active' : ''; ?>"
+                data-feature="<?php echo esc_attr($value); ?>">
+                <?php echo esc_html($label); ?>
+                <?php if ($is_active) : ?><span class="feature-pill-x">&times;</span><?php endif; ?>
+              </button>
+              <input type="hidden"
+                name="features[]"
+                value="<?php echo esc_attr($value); ?>"
+                class="feature-pill-input"
+                <?php echo $is_active ? '' : 'disabled'; ?>>
+            <?php endforeach; ?>
+          </div>
+        </div>
 
         <button type="submit">Search Properties</button>
         <button type="button" id="reset-filter">Reset</button>
@@ -271,5 +311,27 @@ $price_options  = build_price_scale($max_site_price);
 			<?php endforeach; ?>
 		</select>
         <button type="submit">Search Properties</button>
+
+        <div class="feature-pills-row">
+          <span class="feature-pills-label">Property Features:</span>
+          <div class="feature-pills-track">
+            <?php
+            foreach ( $feature_pill_options as $value => $label ) :
+              $is_active = in_array($value, $active_features, true);
+            ?>
+              <button type="button"
+                class="feature-pill<?php echo $is_active ? ' is-active' : ''; ?>"
+                data-feature="<?php echo esc_attr($value); ?>">
+                <?php echo esc_html($label); ?>
+                <?php if ($is_active) : ?><span class="feature-pill-x">&times;</span><?php endif; ?>
+              </button>
+              <input type="hidden"
+                name="features[]"
+                value="<?php echo esc_attr($value); ?>"
+                class="feature-pill-input"
+                <?php echo $is_active ? '' : 'disabled'; ?>>
+            <?php endforeach; ?>
+          </div>
+        </div>
     </form>
 </div>

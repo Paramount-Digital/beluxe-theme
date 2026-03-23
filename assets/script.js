@@ -113,6 +113,77 @@ document.addEventListener(
 
 		}
 
+		// Feature pills toggle (with drag guard)
+		document.querySelectorAll('.feature-pill').forEach(pill => {
+			pill.addEventListener('click', function() {
+				if (this.closest('.feature-pills-track')?.dataset.dragging === 'true') return;
+
+				const feature = this.dataset.feature;
+				const form = this.closest('form');
+				const input = form.querySelector(
+					'input.feature-pill-input[value="' + feature + '"]'
+				);
+				const isActive = this.classList.contains('is-active');
+
+				if (isActive) {
+					this.classList.remove('is-active');
+					this.querySelector('.feature-pill-x')?.remove();
+					if (input) input.disabled = true;
+				} else {
+					this.classList.add('is-active');
+					if (!this.querySelector('.feature-pill-x')) {
+						const x = document.createElement('span');
+						x.className = 'feature-pill-x';
+						x.textContent = '\u00d7';
+						this.appendChild(x);
+					}
+					if (input) input.disabled = false;
+				}
+			});
+		});
+
+		// Drag to scroll feature pills track
+		document.querySelectorAll('.feature-pills-track').forEach(track => {
+			let isDown = false;
+			let startX;
+			let scrollLeft;
+			let startMouseX;
+
+			track.addEventListener('mousedown', e => {
+				isDown = true;
+				startMouseX = e.pageX;
+				track.dataset.dragging = 'false';
+				track.classList.add('is-dragging');
+				startX = e.pageX - track.offsetLeft;
+				scrollLeft = track.scrollLeft;
+				e.preventDefault();
+			});
+
+			track.addEventListener('mouseleave', () => {
+				isDown = false;
+				track.classList.remove('is-dragging');
+			});
+
+			track.addEventListener('mouseup', () => {
+				isDown = false;
+				track.classList.remove('is-dragging');
+				// Reset drag flag after a tick so click handler can read it
+				setTimeout(() => { track.dataset.dragging = 'false'; }, 10);
+			});
+
+			track.addEventListener('mousemove', e => {
+				if (!isDown) return;
+				e.preventDefault();
+				// Mark as dragging if moved more than 5px
+				if (Math.abs(e.pageX - startMouseX) > 5) {
+					track.dataset.dragging = 'true';
+				}
+				const x = e.pageX - track.offsetLeft;
+				const walk = (x - startX) * 1.5;
+				track.scrollLeft = scrollLeft - walk;
+			});
+		});
+
 		// close all details elements on click
 		const details_elements = document.querySelectorAll('details');
 

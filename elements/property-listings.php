@@ -15,25 +15,23 @@ $current_sort = isset($_GET['sortby']) ? sanitize_text_field($_GET['sortby']) : 
 			<div class="col-12 property-listing-header">
 				<span class="property-count"><?php echo esc_html( $wp_query->found_posts ); ?> Properties</span>
 
-				<div class="property-sort-wrap">
-					<label class="property-sort-label" for="property-sort">Sort By</label>
-					<form class="property-sort-form" method="GET" action="<?php echo esc_url( strtok( $_SERVER['REQUEST_URI'], '?' ) ); ?>">
-						<?php
-						foreach ( $_GET as $key => $value ) {
-							if ( $key === 'sortby' ) {
-								continue;
-							}
-							echo '<input type="hidden" name="' . esc_attr( $key ) . '" value="' . esc_attr( $value ) . '">';
-						}
-						?>
+				<form class="property-filter-controls" method="GET" action="<?php echo esc_url( strtok( $_SERVER['REQUEST_URI'], '?' ) ); ?>">
+					<?php
+					foreach ( $_GET as $key => $value ) {
+						if ( $key === 'sortby' ) continue;
+						echo '<input type="hidden" name="' . esc_attr( $key ) . '" value="' . esc_attr( $value ) . '">';
+					}
+					?>
+					<div class="property-filter-group">
+						<label class="property-filter-label" for="property-sort">Sort By</label>
 						<select name="sortby" id="property-sort">
 							<option value="recent" <?php selected( $current_sort, 'recent' ); ?>>Recently Added</option>
 							<option value="price_asc" <?php selected( $current_sort, 'price_asc' ); ?>>Price: Low to High</option>
 							<option value="price_desc" <?php selected( $current_sort, 'price_desc' ); ?>>Price: High to Low</option>
 						</select>
-						<noscript><input type="submit" value="Sort" /></noscript>
-					</form>
-				</div>
+					</div>
+					<noscript><input type="submit" value="Sort" /></noscript>
+				</form>
 			</div>
 
 			<div class="col-12 property-grid">
