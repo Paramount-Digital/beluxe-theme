@@ -1,0 +1,20 @@
+# Environment
+.env
+
+# Docker volumes
+db_data/
+
+# WordPress uploads (large media files)
+wp-content/uploads/
+
+# Node
+node_modules/
+
+# Build artifacts
+*.min.js
+*.min.css
+*.map
+
+# OS files
+.DS_Store
+Thumbs.db

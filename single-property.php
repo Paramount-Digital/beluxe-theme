@@ -21,52 +21,79 @@ get_header(); ?>
     $first_location = $location_terms[0]->name;
 ?>
 
-<section>
+<section class="single-property-listing">
 
     <div class="container">
 
-        <div class="property-details">
+        <?php if ( $yearBuilt || $bedrooms || $bathrooms || $buildSize || $terraceSize || $plotSize ) : ?>
+
+        <div class="property-details col-12">
+            <?php if ($yearBuilt) : ?>
             <div class="property-detail">
                 <img src="/wp-content/uploads/2025/08/calendar_OFF-1.png"><p class="detail">Year Built</p><hr class="detail-sep"/><p class="value"><?php echo esc_html($yearBuilt); ?></p>
             </div>
+            <?php endif; ?>
+            <?php if ($bedrooms) : ?>
             <div class="property-detail">
                 <img src="/wp-content/uploads/2025/08/bed_OFF-8.png"><p class="detail">Bedrooms</p><hr class="detail-sep"/><p class="value"><?php echo esc_html($bedrooms); ?></p>
             </div>
+            <?php endif; ?>
+            <?php if ($bathrooms) : ?>
             <div class="property-detail">
                 <img src="/wp-content/uploads/2025/08/BATHROOMS_OFF-8.png"><p class="detail">Bathrooms</p><hr class="detail-sep"/><p class="value"><?php echo esc_html($bathrooms); ?></p>
             </div>
+            <?php endif; ?>
+            <?php if ($buildSize) : ?>
             <div class="property-detail">
                 <img src="/wp-content/uploads/2025/08/HOUSE_OFF-8.png"><p class="detail">Built Size</p><hr class="detail-sep"/><p class="value"><?php echo esc_html($buildSize); ?>M²</p>
             </div>
+            <?php endif; ?>
+            <?php if ($terraceSize) : ?>
             <div class="property-detail">
                 <img src="/wp-content/uploads/2025/08/TERRACE_OFF-1.png"><p class="detail">Terrace Size</p><hr class="detail-sep"/><p class="value"><?php echo esc_html($terraceSize); ?>M²</p>
             </div>
+            <?php endif; ?>
+            <?php if ($plotSize) : ?>
             <div class="property-detail">
                 <img src="/wp-content/uploads/2025/08/PLOT_OFF-8.png"><p class="detail">Plot Size</p><hr class="detail-sep"/><p class="value"><?php echo esc_html($plotSize); ?>M²</p>
             </div>
+            <?php endif; ?>
         </div>
+
+        <?php endif; ?>
 
     </div>
 
     <div class="container">
 
-        <div class="col-6 property-left">
+        <div class="col-12 col-lg-6 property-left">
 
-            <h2 class="property-content-title">Luxury Villas in <?php echo esc_html($first_location); ?></h2>
-            <p class="property-content-p"><?php echo wp_strip_all_tags( get_the_content() ); ?></p>
+<!--             <h2 class="property-content-title">Luxury Villas in </?ph/p echo esc_html($first_location); ?/></h2> -->
+            <p class="property-content-p"><?php echo the_content(); ?></p>
 
         </div>
 
-        <div class="col-6 property-right">
+        <div class="col-12 col-lg-6 property-right">
 
-            <h2 class="property-content-title pointers-title">Luxury Villas in <?php echo esc_html($first_location); ?></h2>
+            <h2 class="property-content-title pointers-title">Features and Details</h2>
 
             <?php if ( have_rows('key_features') ) : ?>
-                <ul class="key-features">
+                <?php 
+                    $feature_count = 0; 
+                    $list_id = 'key-features-' . get_the_ID(); 
+                ?>
+                <ul class="key-features" id="<?php echo esc_attr( $list_id ); ?>" data-expanded="false">
                     <?php while ( have_rows('key_features') ) : the_row(); ?>
-                        <li><?php the_sub_field('feature'); ?></li>
+                        <?php 
+                            $feature_count++; 
+                            $hidden_class = ( $feature_count > 14 ) ? ' is-hidden' : ''; 
+                        ?>
+                        <li class="<?php echo esc_attr( $hidden_class ); ?>"><?php the_sub_field('feature'); ?></li>
                     <?php endwhile; ?>
                 </ul>
+                <?php if ( $feature_count > 10 ) : ?>
+                    <button class="key-features-toggle button" type="button" aria-expanded="false" aria-controls="<?php echo esc_attr( $list_id ); ?>" data-more="Show more" data-less="Show less">Show more</button>
+                <?php endif; ?>
             <?php endif; ?>
 
         </div>
@@ -75,42 +102,80 @@ get_header(); ?>
 
     <div class="container">
 
-        <?php $gallery = get_field('property_gallery'); ?>
-        <?php if ($gallery && is_array($gallery)) : ?>
-        <div class="property-gallery-swiper swiper">
-            <div class="swiper-wrapper">
-                <?php foreach ($gallery as $image) : ?>
-                    <div class="swiper-slide">
-                        <img src="<?php echo esc_url($image['url']); ?>" alt="<?php echo esc_attr($image['alt']); ?>" style="width:100%;height:auto;" />
-                    </div>
-                <?php endforeach; ?>
+        <?php 
+        // Check for external gallery first (comma-separated URLs), fallback to property_gallery
+        $external_gallery_raw = get_field('external_property_gallery');
+        $gallery = get_field('property_gallery');
+        
+        // Parse external gallery URLs if it's a string
+        $external_gallery_urls = [];
+        if (!empty($external_gallery_raw) && is_string($external_gallery_raw)) {
+            $urls = preg_split('/[,\r\n]+/', $external_gallery_raw, -1, PREG_SPLIT_NO_EMPTY);
+            $external_gallery_urls = array_map('trim', array_filter($urls));
+        }
+        
+        $use_external = !empty($external_gallery_urls);
+        ?>
+        
+        <?php if ($use_external || ($gallery && is_array($gallery))) : ?>
+            <div class="property-gallery-swiper swiper">
+                <div class="swiper-wrapper">
+                    <?php if ($use_external) : ?>
+                        <?php foreach ($external_gallery_urls as $url) : ?>
+                            <div class="swiper-slide">
+                                <img src="<?php echo esc_url($url); ?>" alt="Property Image"/>
+                            </div>
+                        <?php endforeach; ?>
+                    <?php else : ?>
+                        <?php foreach ($gallery as $image) : ?>
+                            <div class="swiper-slide">
+                                <img src="<?php echo esc_url($image['url']); ?>" alt="<?php echo esc_attr($image['alt']); ?>"/>
+                            </div>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
+                </div>
             </div>
-        </div>
+            <div class="property-gallery-thumbs swiper">
+                <div class="swiper-wrapper">
+                    <?php if ($use_external) : ?>
+                        <?php foreach ($external_gallery_urls as $url) : ?>
+                            <div class="swiper-slide">
+                                <img src="<?php echo esc_url($url); ?>" alt="Property Thumbnail" />
+                            </div>
+                        <?php endforeach; ?>
+                    <?php else : ?>
+                        <?php foreach ($gallery as $image) : ?>
+                            <div class="swiper-slide">
+                                <img src="<?php echo esc_url($image['sizes']['thumbnail']); ?>" alt="<?php echo esc_attr($image['alt']); ?>" />
+                            </div>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
+                </div>
+            </div>
         <?php endif; ?>
+
+        
 
     </div>
 
 </section>
 
-<?php get_footer(); ?>
-
+<?php footer_additional_sections(); 
+get_footer();?>
+    
 <script>
-    const propertyGallerySwiper = new Swiper('.swiper', {
-  // Optional parameters
-  direction: 'horizontal',
-  loop: true,
+  const thumbsSwiper = new Swiper('.property-gallery-thumbs', {
+    spaceBetween: 10,
+  });
 
-  // Navigation arrows
-  navigation: {
-    nextEl: '.swiper-button-next',
-    prevEl: '.swiper-button-prev',
-  },
-
-});
+  const propertyGallerySwiper = new Swiper('.property-gallery-swiper', {
+    direction: 'horizontal',
+    loop: false,              // loop only the main swiper
+    autoplay: {
+      delay: 5000,
+    },
+    thumbs: {
+      swiper: thumbsSwiper,
+    },
+  });
 </script>
-
-<style>
-    .property-gallery-swiper {
-        padding-top: 100px;
-    }
-</style>

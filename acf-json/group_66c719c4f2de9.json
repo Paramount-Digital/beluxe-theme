@@ -263,11 +263,13 @@
                 "param": "post_type",
                 "operator": "==",
                 "value": "page"
-            },
+            }
+        ],
+        [
             {
-                "param": "page_template",
-                "operator": "!=",
-                "value": "templates\/page-location-template.php"
+                "param": "post_type",
+                "operator": "==",
+                "value": "area-guides"
             }
         ]
     ],
@@ -280,5 +282,5 @@
     "active": true,
     "description": "",
     "show_in_rest": 0,
-    "modified": 1751534481
+    "modified": 1755634532
 }

@@ -13,7 +13,10 @@ $fields = [
 ];
 
 // Context overrides
-if ( is_post_type_archive() ) {
+
+if ( is_post_type_archive( 'developments' ) ) {
+  $fields['content'] = '<h1>New Developments</h1>';
+} elseif ( is_post_type_archive() ) {
   $fields['content'] = '<h1>' . post_type_archive_title( '', false ) . '</h1>';
 } elseif ( is_singular( 'post' ) ) {
   $fields['content'] = '<h1>' . get_the_title() . '</h1>';
@@ -26,6 +29,28 @@ if ( is_post_type_archive() ) {
     category_description(),
     do_shortcode( '[searchform post_types="post"]' )
   );
+} elseif ( is_tax( 'property-type' ) ) { 
+    $term = get_queried_object();
+    $fields['sizing'] = 'small-banner';
+    if ( $term->slug === 'new-developments' ) {
+        $fields['content'] = '<h1>New Developments</h1>';
+    } else {
+        $fields['content'] = '<h1>' . esc_html( $term->name ) . '</h1>';
+    }
+} elseif ( is_tax( 'locations' ) ) { 
+    $term = get_queried_object();
+    $fields['sizing'] = 'small-banner';
+    $fields['content'] = '<h1>' . esc_html( $term->name ) . '</h1>';
+    if ( ! empty( $term->description ) ) {
+        $fields['content'] .= '<div class="location-description">' . wp_kses_post( wpautop( $term->description ) ) . '</div>';
+    }
+} elseif ( is_home()) {
+    $fields['sizing'] = 'small-banner';
+    $fields['content'] = '<h1>Blog</h1>';
+} elseif ( is_page('about') ) {
+  $fields['sizing'] = 'small-banner';
+} elseif ( is_page('contact') ) {
+  $fields['sizing'] = 'small-banner';
 } elseif ( is_search() ) {
   $q = get_search_query();
   $fields['content'] = sprintf(
@@ -53,6 +78,7 @@ $classes = array_filter([
   'single-page-banner',
   $fields['sizing'] ? 'page-' . sanitize_html_class( $fields['sizing'] ) : '',
   'swiper',
+  ( is_singular('property') ? 'property-banner' : '' ),
 ]);
 ?>
 <header role="banner" aria-label="Page Hero" class="<?php echo esc_attr( implode( ' ', $classes ) ); ?>">
@@ -61,7 +87,19 @@ $classes = array_filter([
       <div class="container">
         <div class="banner-content col-12 col-lg-8 song-2">
           <?php
-          echo wp_kses_post( $fields['content'] );
+          if ( is_singular('property') ) {
+            $reference = get_field('reference_number', $page_id);
+            if ($reference) {
+              echo '<div class="single-property-reference"> ' . esc_html($reference) . '</div>';
+            }
+            echo wp_kses_post( $fields['content'] );
+            $price = get_field('for_sale_price', $page_id);
+            if ($price) {
+              echo '<div class="single-property-price"> € ' . esc_html(number_format($price)) . '</div>';
+            }
+          } else {
+            echo wp_kses_post( $fields['content'] );
+          }
           base_get_content_buttons( [ 'prefix' => 'banner_' ] );
           if ( function_exists( 'yoast_breadcrumb' ) ) {
             echo '<nav class="banner-breadcrumbs screen-reader-text">'
@@ -69,16 +107,51 @@ $classes = array_filter([
                . '</nav>';
           }
           ?>
+        
         </div>
+
+        <?php
+        if ( is_front_page() || is_post_type_archive('property') ) {
+          echo do_shortcode('[property_filter]');
+        }
+        ?>
+
       </div>
 
       <?php
       //Background media
-      $bg_id     = $fields['media']['background_image']        ?? 0;
+      // For properties, check external gallery first
+      if (is_singular('property')) {
+        $external_url = get_property_featured_image_url($page_id);
+        if ($external_url) {
+          $bg_id = $external_url; // Use the URL directly
+        } else {
+          $bg_id = get_post_thumbnail_id($page_id) ?: get_site_url() . '/wp-content/uploads/2025/07/home-hero.jpg';
+        }
+      } else {
+        $bg_id = !empty($fields['media']['background_image'])
+            ? $fields['media']['background_image']
+            : (get_post_thumbnail_id($page_id) ?: get_site_url() . '/wp-content/uploads/2025/07/home-hero.jpg');
+      }
       $mobile_id = $fields['media']['mobile_background_image'] ?? 0;
 
       if ( $bg_id ) :
-        list( $url, $w, $h ) = wp_get_attachment_image_src( $bg_id, 'full' );
+        if ( is_numeric($bg_id) ) {
+          $img_data = wp_get_attachment_image_src( $bg_id, 'full' );
+          if ($img_data && !empty($img_data[0])) {
+            $url = $img_data[0];
+            $w = $img_data[1];
+            $h = $img_data[2];
+          } else {
+            $url = get_site_url() . '/wp-content/uploads/2025/07/home-hero.jpg';
+            $w = 1920;
+            $h = 1080;
+          }
+        } else {
+          $url = $bg_id;
+          $w = 1920;
+          $h = 1080;
+        }
       ?>
         <div class="banner-background" data-bg-id="<?php echo intval( $bg_id ); ?>" data-mobile-id="<?php echo intval( $mobile_id ); ?>">
           <?php echo '<svg class="draw-svg" xmlns="http://www.w3.org/2000/svg" width="438" height="588" viewBox="0 0 438 588" fill="none">
@@ -105,7 +178,15 @@ $classes = array_filter([
           </picture>
         </div>
       <?php endif; ?>
-
+    
     </div><!-- .swiper-slide -->
   </div><!-- .swiper-wrapper -->
 </header>
+
+<?php
+if ( is_front_page() || is_post_type_archive('property') ) {
+	?><div class="mobile-filter-button">
+		<button type="button" id="open-filter-modal" class="filter-modal-trigger">Start Your Search</button>
+	</div>
+<?php }
+?>

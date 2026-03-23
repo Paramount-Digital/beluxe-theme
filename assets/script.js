@@ -1,25 +1,6 @@
 document.addEventListener(
 	"DOMContentLoaded", async () => {
 
-		// //mmenu slideout menu navigation
-		// const slideout_menu = document.querySelector( "#generate-slideout-menu .inside-navigation" );
-		
-		// //initialise MmenuLight for mobile menu & if has children items to create menu
-		// if(typeof MmenuLight != 'undefined') {
-				
-		// 	const menu = new MmenuLight(slideout_menu),
-		// 		  menu_navigation = menu.navigation(),
-		// 		  drawer = menu.offcanvas();
-
-		// 	document.querySelector( '.menu-toggle' )
-		// 		.addEventListener(
-		// 			"click", ( evnt ) => {
-		// 				evnt.preventDefault();
-		// 				drawer.open();
-		// 			}
-		// 		);
-			
-		// }
 		
 		// remove song-2 (blur) class from banner-content on page load
 		setTimeout(() => {
@@ -27,8 +8,181 @@ document.addEventListener(
 			if (bannerContent) {
 				bannerContent.classList.remove('song-2');
 			} 
-		}, 1000);
+		}, 200);
 
+		 //initialise Choices for select elements
+		if(typeof Choices != 'undefined') {
+			// Change placeholder text for phone prefix select to "Prefix"
+			const phonePrefixSelect = document.querySelector('.phone-wrapper [data-name="phone-prefix"] select, .phone-wrapper [data-name="prone-prefix"] select');
+			if (phonePrefixSelect) {
+				const placeholderOpt =
+					phonePrefixSelect.querySelector('option[value=""], option[disabled][selected], option[disabled][value=""]')
+					|| phonePrefixSelect.options[0];
+				if (placeholderOpt) {
+					placeholderOpt.textContent = 'Prefix';
+				}
+			}
+
+			// Init sort dropdown separately with search disabled
+			const sortSelect = document.getElementById('property-sort');
+			if (sortSelect) {
+				new Choices(sortSelect, {
+					searchEnabled: false,
+					shouldSort: false,
+				});
+				sortSelect.addEventListener('change', function() {
+					this.closest('form').submit();
+				});
+			}
+
+			// Features: single-select pill with multi-select behaviour via hidden inputs
+			const featuresSelect = document.getElementById('property-features');
+			if (featuresSelect) {
+				const form = featuresSelect.closest('form');
+				let selectedFeatures = Array.from(
+					form.querySelectorAll('input[name="features[]"]')
+				).map(i => i.value).filter(Boolean);
+
+				const featuresChoices = new Choices(featuresSelect, {
+					searchEnabled: false,
+					shouldSort: false,
+					itemSelectText: '',
+				});
+
+				function updateFeaturesLabel() {
+					const opts = featuresSelect.options;
+					const labels = selectedFeatures.map(val => {
+						const opt = Array.from(opts).find(o => o.value === val);
+						return opt ? opt.text : val;
+					});
+					if (labels.length === 0) {
+						featuresChoices.setChoiceByValue('');
+					} else if (labels.length === 1) {
+						featuresChoices.setChoiceByValue(selectedFeatures[0]);
+					} else {
+						const inner = featuresSelect.closest('.choices');
+						if (inner) {
+							const span = inner.querySelector('.choices__item--selectable');
+							if (span) span.textContent = labels[0] + ' +' + (labels.length - 1);
+						}
+					}
+				}
+
+				updateFeaturesLabel();
+
+				featuresSelect.addEventListener('change', function() {
+					const val = this.value;
+					if (!val) {
+						selectedFeatures = [];
+					} else if (selectedFeatures.includes(val)) {
+						selectedFeatures = selectedFeatures.filter(f => f !== val);
+					} else {
+						selectedFeatures.push(val);
+					}
+
+					form.querySelectorAll('input[name="features[]"]').forEach(i => i.remove());
+
+					selectedFeatures.forEach(f => {
+						const hidden = document.createElement('input');
+						hidden.type = 'hidden';
+						hidden.name = 'features[]';
+						hidden.value = f;
+						form.appendChild(hidden);
+					});
+
+					updateFeaturesLabel();
+					setTimeout(() => form.submit(), 50);
+				});
+			}
+
+			const select_elements = document.querySelectorAll('select');
+			//apply Choices to all select elements
+			select_elements?.forEach(select => {
+				// Skip selects already initialised above
+				if (select.id === 'property-sort' || select.id === 'property-features') return;
+
+				// Check if this is a price dropdown
+				const isPriceSelect = select.name === 'price_min' || select.name === 'price_max';
+
+				new Choices(select, {
+					searchEnabled: true,
+					searchPlaceholderValue: 'Search...',
+					shouldSort: isPriceSelect ? false : true,  // Don't sort price dropdowns
+				});
+			});
+
+		}
+
+		// Feature pills toggle (with drag guard)
+		document.querySelectorAll('.feature-pill').forEach(pill => {
+			pill.addEventListener('click', function() {
+				if (this.closest('.feature-pills-track')?.dataset.dragging === 'true') return;
+
+				const feature = this.dataset.feature;
+				const form = this.closest('form');
+				const input = form.querySelector(
+					'input.feature-pill-input[value="' + feature + '"]'
+				);
+				const isActive = this.classList.contains('is-active');
+
+				if (isActive) {
+					this.classList.remove('is-active');
+					this.querySelector('.feature-pill-x')?.remove();
+					if (input) input.disabled = true;
+				} else {
+					this.classList.add('is-active');
+					if (!this.querySelector('.feature-pill-x')) {
+						const x = document.createElement('span');
+						x.className = 'feature-pill-x';
+						x.textContent = '\u00d7';
+						this.appendChild(x);
+					}
+					if (input) input.disabled = false;
+				}
+			});
+		});
+
+		// Drag to scroll feature pills track
+		document.querySelectorAll('.feature-pills-track').forEach(track => {
+			let isDown = false;
+			let startX;
+			let scrollLeft;
+			let startMouseX;
+
+			track.addEventListener('mousedown', e => {
+				isDown = true;
+				startMouseX = e.pageX;
+				track.dataset.dragging = 'false';
+				track.classList.add('is-dragging');
+				startX = e.pageX - track.offsetLeft;
+				scrollLeft = track.scrollLeft;
+				e.preventDefault();
+			});
+
+			track.addEventListener('mouseleave', () => {
+				isDown = false;
+				track.classList.remove('is-dragging');
+			});
+
+			track.addEventListener('mouseup', () => {
+				isDown = false;
+				track.classList.remove('is-dragging');
+				// Reset drag flag after a tick so click handler can read it
+				setTimeout(() => { track.dataset.dragging = 'false'; }, 10);
+			});
+
+			track.addEventListener('mousemove', e => {
+				if (!isDown) return;
+				e.preventDefault();
+				// Mark as dragging if moved more than 5px
+				if (Math.abs(e.pageX - startMouseX) > 5) {
+					track.dataset.dragging = 'true';
+				}
+				const x = e.pageX - track.offsetLeft;
+				const walk = (x - startX) * 1.5;
+				track.scrollLeft = scrollLeft - walk;
+			});
+		});
 
 		// close all details elements on click
 		const details_elements = document.querySelectorAll('details');
@@ -57,32 +211,6 @@ document.addEventListener(
 
 		}
 		
-
-
-		//nice select2 vanilla js 
-		if(typeof NiceSelect != 'undefined') {
-
-			var all_select_instances = [];
-			let select_el = document.querySelectorAll('select');
-
-			for (let i = 0; i < select_el.length; i++) {         
-				var nice_select_instance = NiceSelect.bind(document.querySelectorAll("select")[i]);
-				all_select_instances.push(nice_select_instance);
-			}
-
-			reset_niceselect = function() {
-
-				for (let i = 0; i < all_select_instances.length; i++) {
-					all_select_instances[i].update();
-				}
-
-			}
-			
-			//membership tabs
-			
-
-		}
-
 
 		//readmore functionality
 		if(typeof readSmore != "undefined") {
@@ -129,44 +257,127 @@ document.addEventListener(
 				},
 				speed: 4000,
 			} );
-		}
 
-		// Content image slider: images slide, content fades
-		if ( typeof Swiper !== 'undefined' ) {
+		// Content image slider - 2 sliders in one section
 			document.querySelectorAll('.content-image-slider').forEach(section => {
-				const container = section.querySelector('.swiper-container');
-				const nextEl = section.querySelector('.swiper-button-next');
-				const prevEl = section.querySelector('.swiper-button-prev');
-				const contents = Array.from(section.querySelectorAll('.content-stack .content-item'));
-				if (!container || contents.length === 0) return;
+				const imagesContainer = section.querySelector('.images-slider.swiper-container');
+				const contentContainer = section.querySelector('.content-slider.swiper-container');
+				const nextEl = section.querySelector('.content-image-slider .image-slider-next');
+				const prevEl = section.querySelector('.content-image-slider .image-slider-prev');
+				if (!imagesContainer || !contentContainer) return;
 
-				const activate = (index) => {
-					contents.forEach((el, i) => {
-						if (i === index) {
-							el.classList.add('is-active');
-							el.setAttribute('aria-hidden', 'false');
-						} else {
-							el.classList.remove('is-active');
-							el.setAttribute('aria-hidden', 'true');
-						}
-					});
-				};
-
-				activate(0);
-
-				const swiper = new Swiper(container, {
+				// Content slider
+				const contentSwiper = new Swiper(contentContainer, {
 					slidesPerView: 1,
-					loop: contents.length > 1,
-					speed: 800,
+					effect: 'fade',
+					fadeEffect: { crossFade: true },
+					allowTouchMove: false,
+				});
+
+				// Image slider with fraction nav
+				const imagesSwiper = new Swiper(imagesContainer, {
+					slidesPerView: 1,
+					loop: contentSwiper.slides.length > 1,
+					speed: 600,
+					spaceBetween: 20,
 					navigation: { nextEl, prevEl },
-					effect: 'slide',
-					on: {
-						slideChange() {
-							activate(this.realIndex);
+					pagination: {
+       						el: ".image-slider-pagination",
+        					type: "fraction",
+      						},
+				});
+
+				// Sync content fade to image slide
+				imagesSwiper.on('slideChange', () => {
+					contentSwiper.slideTo(imagesSwiper.realIndex);
+				});
+			});
+			
+			
+			// Featured property slider
+			document.querySelectorAll('.featured-property-slider').forEach(section => {
+				const container = section.querySelector('.property-slider.swiper-container');
+				const prevEl = section.querySelector('.property-slider .property-slider-prev');
+				const nextEl = section.querySelector('.property-slider .property-slider-next');
+				if (!container) return;
+
+				new Swiper(container, {
+					slidesPerView: 1.1,
+					loop: true,
+					speed: 800,
+					spaceBetween: 20,
+					navigation: { prevEl, nextEl },
+					pagination: {
+						el: ".property-slider-pagination",
+						type: "fraction",
+					},
+					centeredSlides: true,
+					breakpoints: {
+						768: {
+							centeredSlides: false
 						}
 					}
 				});
 			});
+
+			// Initialize Infinite Marquee for locations
+				new InfiniteMarquee({
+					element: '.marquee-container',
+					speed: 25000,
+					smoothEdges: false,
+					direction: 'right',
+					gap: '20px',
+					duplicateCount: -1,
+					duplicateInnerElements: false,
+					mobileSettings: {
+						direction: 'top',
+						speed: 20000
+					},
+					on: {
+						beforeInit: () => {
+							console.log('Not Yet Initialized');
+						},
+
+						afterInit: () => {
+							console.log('Initialized');
+						}
+					}
+				});
 		}
-	}
-)
+
+			// Key features: toggle show more/less
+			const featureToggles = document.querySelectorAll('.key-features-toggle');
+			featureToggles.forEach(btn => {
+				btn.addEventListener('click', () => {
+					const listId = btn.getAttribute('aria-controls');
+					const list = document.getElementById(listId);
+					if (!list) return;
+					const expanded = list.getAttribute('data-expanded') === 'true';
+					list.setAttribute('data-expanded', expanded ? 'false' : 'true');
+					btn.setAttribute('aria-expanded', expanded ? 'false' : 'true');
+					const more = btn.getAttribute('data-more') || 'Show more';
+					const less = btn.getAttribute('data-less') || 'Show less';
+					btn.textContent = expanded ? more : less;
+				});
+			});
+
+			const openBtn = document.getElementById('open-filter-modal');
+			const modal = document.getElementById('filter-modal');
+
+			if (openBtn && modal) {
+					openBtn.onclick = () => {
+					modal.classList.add('active');
+				};
+
+				modal.onclick = (e) => {
+				if (e.target === modal) modal.classList.remove('active');
+				};
+			}
+
+			const cards = document.querySelectorAll('.property-card');
+			cards.forEach((card, i) => {
+				setTimeout(() => {
+				card.classList.add('visible');
+				}, i * 150); // stagger left to right
+			});
+	});
