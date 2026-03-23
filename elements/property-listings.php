@@ -19,6 +19,7 @@ $current_sort = isset($_GET['sortby']) ? sanitize_text_field($_GET['sortby']) : 
 					<?php
 					foreach ( $_GET as $key => $value ) {
 						if ( $key === 'sortby' ) continue;
+						if ( is_array( $value ) ) continue;
 						echo '<input type="hidden" name="' . esc_attr( $key ) . '" value="' . esc_attr( $value ) . '">';
 					}
 					?>

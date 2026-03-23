@@ -109,22 +109,9 @@ function build_price_scale($max_price) {
 $max_site_price = get_max_for_sale_price();
 $price_options  = build_price_scale($max_site_price);
 
-// Feature pill options
-$feature_pill_options = [
-  'close_to_golf'   => 'Close to Golf',
-  'country_view'    => 'Country View',
-  'mountain_view'   => 'Mountain View',
-  'panoramic_view'  => 'Panoramic View',
-  'sea_view'        => 'Sea View',
-  'gated_community' => 'Gated Community',
-  'beachside'       => 'Beachside',
-  'balcony'         => 'Balcony',
-  'city_views'      => 'City Views',
-  'indoor_pool'     => 'Indoor Pool',
-  'jacuzzi'         => 'Jacuzzi',
-];
+$feature_pill_options = get_feature_options();
 $active_features = isset($_GET['features']) && is_array($_GET['features'])
-  ? array_map('sanitize_text_field', $_GET['features'])
+  ? array_map('sanitize_text_field', array_slice($_GET['features'], 0, 20))
   : [];
 ?>
 

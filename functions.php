@@ -403,6 +403,22 @@ function get_feature_keywords() {
     ];
 }
 
+function get_feature_options() {
+    return [
+        'close_to_golf'   => 'Close to Golf',
+        'country_view'    => 'Country View',
+        'mountain_view'   => 'Mountain View',
+        'panoramic_view'  => 'Panoramic View',
+        'sea_view'        => 'Sea View',
+        'gated_community' => 'Gated Community',
+        'beachside'       => 'Beachside',
+        'balcony'         => 'Balcony',
+        'city_views'      => 'City Views',
+        'indoor_pool'     => 'Indoor Pool',
+        'jacuzzi'         => 'Jacuzzi',
+    ];
+}
+
 // Check if a property matches all selected features
 function property_matches_features_global( $post_id, $selected_features ) {
     if ( empty( $selected_features ) ) return true;
@@ -525,7 +541,7 @@ add_action('pre_get_posts', function($query) {
 
             // Feature filtering via post__in (repeater fields can't use meta_query)
             $selected_features = isset($_GET['features']) && is_array($_GET['features'])
-                ? array_map('sanitize_text_field', $_GET['features'])
+                ? array_map('sanitize_text_field', array_slice($_GET['features'], 0, 20))
                 : [];
 
             if ( ! empty( $selected_features ) ) {

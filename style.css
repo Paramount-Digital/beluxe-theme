@@ -2589,7 +2589,8 @@ span.page-numbers.current {
 	white-space: nowrap;
 }
 
-/* Shared pill styles for filter controls (white background overrides) */
+/* Overrides Choices.js library styles which use high-specificity
+   rules. Scoped to .property-filter-controls only. */
 .property-filter-controls .choices {
   min-width: 200px;
 }
@@ -2834,16 +2835,16 @@ span.page-numbers.current {
 
 .feature-pill {
   flex-shrink: 0;
-  background: transparent;
-  border: 1.5px solid rgba(255, 255, 255, 0.6);
+  background: rgba(0, 0, 0, 0.55);
+  border: 1.5px solid rgba(255, 255, 255, 0.5);
   border-radius: 26px;
-  padding: 8px 18px;
+  padding: 3px 12px;
   font-family: Satoshi, sans-serif;
-  font-size: 13px;
+  font-size: 11px;
   font-weight: 500;
   color: #ffffff;
   letter-spacing: 0.5px;
-  cursor: pointer;
+  cursor: grab;
   transition: background 0.2s, border-color 0.2s, color 0.2s;
   white-space: nowrap;
 }

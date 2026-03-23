@@ -7,61 +7,9 @@ if (!defined( 'ABSPATH' ) ) {
 
 $content = get_sub_field('element_content');
 $current_sort = isset($_GET['sortby']) ? sanitize_text_field($_GET['sortby']) : 'recent';
-
-// Features filter — read from features[] array
 $selected_features = isset($_GET['features']) && is_array($_GET['features'])
-  ? array_map('sanitize_text_field', $_GET['features'])
+  ? array_map('sanitize_text_field', array_slice($_GET['features'], 0, 20))
   : [];
-
-// Map filter values to search keywords (fuzzy match terms)
-$feature_keywords = [
-  'close_to_golf'   => ['close to golf', 'golf'],
-  'country_view'    => ['country view', 'countryside'],
-  'mountain_view'   => ['mountain view', 'mountain'],
-  'panoramic_view'  => ['panoramic view', 'panoramic'],
-  'sea_view'        => ['sea view'],
-  'gated_community' => ['gated community', 'gated'],
-  'beachside'       => ['beach', 'beachside', 'front line beach'],
-  'balcony'         => ['balcony', 'terrace'],
-  'city_views'      => ['city view', 'urban view', 'city'],
-  'indoor_pool'     => ['indoor pool'],
-  'jacuzzi'         => ['jacuzzi'],
-];
-
-// Helper: check if a post matches all selected features
-function property_matches_features( $post_id, $selected_features, $feature_keywords ) {
-  if ( empty( $selected_features ) ) return true;
-  $rows = get_field( 'key_features', $post_id );
-  if ( empty( $rows ) ) return false;
-  $feature_text = implode( '|', array_column( $rows, 'feature' ) );
-  foreach ( $selected_features as $selected ) {
-    if ( ! isset( $feature_keywords[ $selected ] ) ) continue;
-    $matched = false;
-    foreach ( $feature_keywords[ $selected ] as $keyword ) {
-      if ( stripos( $feature_text, $keyword ) !== false ) {
-        $matched = true;
-        break;
-      }
-    }
-    if ( ! $matched ) return false;
-  }
-  return true;
-}
-
-// Feature options for the select
-$feature_options = [
-  'close_to_golf'   => 'Close to Golf',
-  'country_view'    => 'Country View',
-  'mountain_view'   => 'Mountain View',
-  'panoramic_view'  => 'Panoramic View',
-  'sea_view'        => 'Sea View',
-  'gated_community' => 'Gated Community',
-  'beachside'       => 'Beachside',
-  'balcony'         => 'Balcony',
-  'city_views'      => 'City Views',
-  'indoor_pool'     => 'Indoor Pool',
-  'jacuzzi'         => 'Jacuzzi',
-];
 ?>
 
 <section class="property-listings">
@@ -89,14 +37,14 @@ $feature_options = [
       if ( ! empty( $selected_features ) ) {
         $property_grid = array_values( array_filter(
           $property_grid,
-          function( $p ) use ( $selected_features, $feature_keywords ) {
-            return property_matches_features( $p->ID, $selected_features, $feature_keywords );
+          function( $p ) use ( $selected_features ) {
+            return property_matches_features_global( $p->ID, $selected_features );
           }
         ));
       }
     ?>
 
-      <script>document.getElementById('property-count').textContent = '<?php echo count( $property_grid ); ?> Properties';</script>
+      <span class="property-count"><?php echo count( $property_grid ); ?> Properties</span>
 
       <div class="property-grid col-12">
         <?php foreach ( $property_grid as $properties ) :
@@ -215,14 +163,14 @@ $feature_options = [
       if ( ! empty( $selected_features ) ) {
         $fallback_posts = array_values( array_filter(
           $fallback_posts,
-          function( $p ) use ( $selected_features, $feature_keywords ) {
-            return property_matches_features( $p->ID, $selected_features, $feature_keywords );
+          function( $p ) use ( $selected_features ) {
+            return property_matches_features_global( $p->ID, $selected_features );
           }
         ));
       }
       ?>
 
-      <script>document.getElementById('property-count').textContent = '<?php echo count( $fallback_posts ); ?> Properties';</script>
+      <span class="property-count"><?php echo count( $fallback_posts ); ?> Properties</span>
 
       <?php if ( ! empty( $fallback_posts ) ) : ?>
         <div class="property-grid col-12">
@@ -310,6 +258,7 @@ $feature_options = [
             </div>
           <?php endforeach; ?>
         </div>
+        <?php wp_reset_postdata(); ?>
       <?php else : ?>
         <div class="col-12">
           <p>No properties match your filters. Please adjust and try again.</p>
