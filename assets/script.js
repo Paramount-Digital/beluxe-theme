@@ -184,6 +184,20 @@ document.addEventListener(
 			});
 		});
 
+		// Feature pills scroll hint
+		document.querySelectorAll('.feature-pills-track').forEach(track => {
+			const wrap = track.closest('.feature-pills-track-wrap');
+			if (!wrap) return;
+
+			function updateScrollHint() {
+				const atEnd = track.scrollLeft + track.clientWidth >= track.scrollWidth - 4;
+				wrap.classList.toggle('is-end', atEnd);
+			}
+
+			track.addEventListener('scroll', updateScrollHint);
+			updateScrollHint(); // run on init
+		});
+
 		// close all details elements on click
 		const details_elements = document.querySelectorAll('details');
 
