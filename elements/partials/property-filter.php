@@ -331,7 +331,8 @@ $active_features = isset($_GET['features']) && is_array($_GET['features'])
             </div>
             <div class="feature-pills-scroll-hint">
               <svg width="8" height="14" viewBox="0 0 8 14" fill="none"
-                xmlns="http://www.w3.org/2000/svg">
+                xmlns="http://www.w3.org/2000/svg"
+                aria-hidden="true" focusable="false">
                 <path d="M1 1L7 7L1 13" stroke="white" stroke-width="1.5"
                   stroke-linecap="round" stroke-linejoin="round"/>
               </svg>
