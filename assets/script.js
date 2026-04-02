@@ -35,55 +35,6 @@ document.addEventListener(
 				});
 			}
 
-			// Features custom checkbox dropdown
-			document.querySelectorAll('.features-dropdown').forEach(function(dropdown) {
-				var toggle = dropdown.querySelector('.features-dropdown__toggle');
-				var panel = dropdown.querySelector('.features-dropdown__panel');
-				var label = dropdown.querySelector('.features-dropdown__label');
-				var checkboxes = dropdown.querySelectorAll('input[type="checkbox"]');
-
-				// Toggle open/close
-				toggle.addEventListener('click', function(e) {
-					e.preventDefault();
-
-					// Close any other open features dropdowns
-					document.querySelectorAll('.features-dropdown.is-open').forEach(function(other) {
-						if (other !== dropdown) other.classList.remove('is-open');
-					});
-
-					dropdown.classList.toggle('is-open');
-				});
-
-				// Handle checkbox changes
-				checkboxes.forEach(function(cb) {
-					cb.addEventListener('change', function() {
-						var tick = this.closest('.features-dropdown__option').querySelector('.features-dropdown__tick');
-						tick.textContent = this.checked ? '\u2713' : '';
-						updateLabel();
-					});
-				});
-
-				function updateLabel() {
-					var count = dropdown.querySelectorAll('input[type="checkbox"]:checked').length;
-					label.textContent = count > 0 ? 'Features (' + count + ')' : 'Features';
-				}
-
-				// Close on outside click
-				document.addEventListener('click', function(e) {
-					if (!dropdown.contains(e.target)) {
-						dropdown.classList.remove('is-open');
-					}
-				});
-
-				// Close on Escape
-				document.addEventListener('keydown', function(e) {
-					if (e.key === 'Escape' && dropdown.classList.contains('is-open')) {
-						dropdown.classList.remove('is-open');
-						toggle.focus();
-					}
-				});
-			});
-
 			const select_elements = document.querySelectorAll('select');
 			//apply Choices to all select elements
 			select_elements?.forEach(select => {
@@ -101,6 +52,65 @@ document.addEventListener(
 			});
 
 		}
+
+		// Features custom checkbox dropdown
+		document.querySelectorAll('.features-dropdown').forEach(function(dropdown) {
+			var toggle = dropdown.querySelector('.features-dropdown__toggle');
+			var label = dropdown.querySelector('.features-dropdown__label');
+			var checkboxes = dropdown.querySelectorAll('input[type="checkbox"]');
+
+			// Toggle open/close
+			toggle.addEventListener('click', function(e) {
+				e.preventDefault();
+
+				// Close any other open features dropdowns
+				document.querySelectorAll('.features-dropdown.is-open').forEach(function(other) {
+					if (other !== dropdown) {
+						other.classList.remove('is-open');
+						other.querySelector('.features-dropdown__toggle').setAttribute('aria-expanded', 'false');
+					}
+				});
+
+				dropdown.classList.toggle('is-open');
+				toggle.setAttribute('aria-expanded', dropdown.classList.contains('is-open') ? 'true' : 'false');
+			});
+
+			// Handle checkbox changes
+			checkboxes.forEach(function(cb) {
+				cb.addEventListener('change', function() {
+					var tick = this.closest('.features-dropdown__option').querySelector('.features-dropdown__tick');
+					tick.textContent = this.checked ? '\u2713' : '';
+					updateLabel();
+				});
+			});
+
+			function updateLabel() {
+				var count = dropdown.querySelectorAll('input[type="checkbox"]:checked').length;
+				label.textContent = count > 0 ? 'Features (' + count + ')' : 'Features';
+			}
+		});
+
+		// Close features dropdown on outside click (single global listener)
+		document.addEventListener('click', function(e) {
+			document.querySelectorAll('.features-dropdown.is-open').forEach(function(open) {
+				if (!open.contains(e.target)) {
+					open.classList.remove('is-open');
+					open.querySelector('.features-dropdown__toggle').setAttribute('aria-expanded', 'false');
+				}
+			});
+		});
+
+		// Close features dropdown on Escape (single global listener)
+		document.addEventListener('keydown', function(e) {
+			if (e.key === 'Escape') {
+				document.querySelectorAll('.features-dropdown.is-open').forEach(function(open) {
+					open.classList.remove('is-open');
+					var toggle = open.querySelector('.features-dropdown__toggle');
+					toggle.setAttribute('aria-expanded', 'false');
+					toggle.focus();
+				});
+			}
+		});
 
 		// close all details elements on click
 		const details_elements = document.querySelectorAll('details');

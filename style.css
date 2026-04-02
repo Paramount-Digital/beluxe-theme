@@ -2683,17 +2683,27 @@ span.page-numbers.current {
   user-select: none;
 }
 
+.features-dropdown__option:focus-within {
+  outline: 2px solid #BFA570;
+  outline-offset: -2px;
+}
+
 .features-dropdown__option:hover {
   background-color: rgba(191, 165, 112, 0.2);
 }
 
-/* Hide the native checkbox */
+/* Visually hide the native checkbox but keep it focusable for accessibility */
 .features-dropdown__option input[type="checkbox"] {
   position: absolute;
   opacity: 0;
-  width: 0;
-  height: 0;
-  pointer-events: none;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  border: 0;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  overflow: hidden;
 }
 
 /* Option text */
@@ -2726,12 +2736,29 @@ span.page-numbers.current {
 }
 
 /* Filter actions — sits in the 4th column of row 2 */
+.property-filter-form .property-filter-actions,
+.property-filter-form-mobile .property-filter-actions,
 .property-filter-form .property-filter-inline-actions,
 .property-filter-form-mobile .property-filter-inline-actions {
   display: flex;
   align-items: center;
   justify-content: flex-end;
   gap: 12px;
+}
+
+.reset-filters-link {
+  font-family: Satoshi, sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  color: #ffffff;
+  text-decoration: none;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+  transition: opacity 0.2s;
+}
+
+.reset-filters-link:hover {
+  opacity: 0.7;
 }
 
 /* Overrides Choices.js library styles which use high-specificity

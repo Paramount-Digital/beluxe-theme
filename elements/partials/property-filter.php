@@ -180,7 +180,7 @@ $active_features = isset($_GET['features']) && is_array($_GET['features'])
 
         <div class="property-filter-col features-filter-col">
           <div class="features-dropdown" id="features-dropdown-mobile">
-            <button type="button" class="features-dropdown__toggle">
+            <button type="button" class="features-dropdown__toggle" aria-expanded="false" aria-controls="features-panel-mobile">
               <span class="features-dropdown__label">Features<?php
                 if ( ! empty( $active_features ) ) {
                   echo ' (' . count( $active_features ) . ')';
@@ -190,7 +190,7 @@ $active_features = isset($_GET['features']) && is_array($_GET['features'])
                 <path d="M1 1L5 5L9 1" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
               </svg>
             </button>
-            <div class="features-dropdown__panel">
+            <div class="features-dropdown__panel" id="features-panel-mobile" role="group" aria-label="Property features">
               <?php foreach ( get_feature_options() as $value => $label ) :
                 $checked = in_array( $value, $active_features, true ) ? 'checked' : '';
               ?>
@@ -270,7 +270,7 @@ $active_features = isset($_GET['features']) && is_array($_GET['features'])
 
         <div class="property-filter-col features-filter-col">
           <div class="features-dropdown" id="features-dropdown-desktop">
-            <button type="button" class="features-dropdown__toggle">
+            <button type="button" class="features-dropdown__toggle" aria-expanded="false" aria-controls="features-panel-desktop">
               <span class="features-dropdown__label">Features<?php
                 if ( ! empty( $active_features ) ) {
                   echo ' (' . count( $active_features ) . ')';
@@ -280,7 +280,7 @@ $active_features = isset($_GET['features']) && is_array($_GET['features'])
                 <path d="M1 1L5 5L9 1" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
               </svg>
             </button>
-            <div class="features-dropdown__panel">
+            <div class="features-dropdown__panel" id="features-panel-desktop" role="group" aria-label="Property features">
               <?php foreach ( get_feature_options() as $value => $label ) :
                 $checked = in_array( $value, $active_features, true ) ? 'checked' : '';
               ?>
