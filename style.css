@@ -2725,12 +2725,13 @@ span.page-numbers.current {
   background-color: rgba(191, 165, 112, 0.2);
 }
 
-.property-filter-form .property-filter-actions {
-  grid-column: 3 / -1;
+/* Filter actions — sits in the 4th column of row 2 */
+.property-filter-form .property-filter-inline-actions,
+.property-filter-form-mobile .property-filter-inline-actions {
   display: flex;
   align-items: center;
   justify-content: flex-end;
-  gap: 16px;
+  gap: 12px;
 }
 
 /* Overrides Choices.js library styles which use high-specificity

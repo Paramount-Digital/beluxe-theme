@@ -206,8 +206,7 @@ $active_features = isset($_GET['features']) && is_array($_GET['features'])
 
         <input type="text" name="reference_number" placeholder="Reference Number" value="<?php echo esc_attr($selected_ref); ?>">
 
-        <!-- Row 3: Actions -->
-        <div class="property-filter-actions">
+        <div class="property-filter-inline-actions">
           <a href="<?php echo esc_url(get_post_type_archive_link('property')); ?>" class="reset-filters-link">Reset Filters</a>
           <button type="submit">Search Properties</button>
         </div>
@@ -297,8 +296,7 @@ $active_features = isset($_GET['features']) && is_array($_GET['features'])
 
         <input type="text" name="reference_number" placeholder="Reference Number" value="<?php echo esc_attr($selected_ref); ?>">
 
-        <!-- Row 3: Actions -->
-        <div class="property-filter-actions">
+        <div class="property-filter-inline-actions">
           <a href="<?php echo esc_url(get_post_type_archive_link('property')); ?>" class="reset-filters-link">Reset Filters</a>
           <button type="submit">Search Properties</button>
         </div>
