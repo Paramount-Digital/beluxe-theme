@@ -109,7 +109,6 @@ function build_price_scale($max_price) {
 $max_site_price = get_max_for_sale_price();
 $price_options  = build_price_scale($max_site_price);
 
-$feature_pill_options = get_feature_options();
 $active_features = isset($_GET['features']) && is_array($_GET['features'])
   ? array_map('sanitize_text_field', array_slice($_GET['features'], 0, 20))
   : [];
@@ -121,14 +120,14 @@ $active_features = isset($_GET['features']) && is_array($_GET['features'])
     <div class="filter-modal-content">
         <form class="property-filter-form-mobile" method="GET" action="<?php echo esc_url(get_post_type_archive_link('property')); ?>">
 
-        <!-- Location (taxonomy) -->
+        <!-- Row 1: Location | Type | Min Price | Max Price -->
         <select name="locations">
             <option value="">All Locations</option>
             <?php
             $locations = get_terms([
                 'taxonomy'   => 'locations',
                 'hide_empty' => true,
-                'childless'  => true, // only terms without children
+                'childless'  => true,
             ]);
             foreach ($locations as $loc) {
                 echo '<option value="' . esc_attr($loc->slug) . '" ' . selected($selected_location, $loc->slug, false) . '>' . esc_html($loc->name) . '</option>';
@@ -136,7 +135,6 @@ $active_features = isset($_GET['features']) && is_array($_GET['features'])
             ?>
         </select>
 
-        <!-- Property Type (taxonomy) -->
         <select name="property-type">
             <option value="">All Types of Property</option>
             <?php
@@ -151,7 +149,6 @@ $active_features = isset($_GET['features']) && is_array($_GET['features'])
         </select>
 
         <div class="price-selects">
-            <!-- Min Price -->
             <select name="price_min" class="min-price">
                 <option value="">Min Price</option>
                 <?php foreach ($price_options as $price): ?>
@@ -161,7 +158,6 @@ $active_features = isset($_GET['features']) && is_array($_GET['features'])
                 <?php endforeach; ?>
             </select>
 
-            <!-- Max Price -->
             <select name="price_max" class="max-price">
                 <option value="">Max Price</option>
                 <?php foreach ($price_options as $price): ?>
@@ -172,7 +168,7 @@ $active_features = isset($_GET['features']) && is_array($_GET['features'])
             </select>
         </div>
 
-        <!-- Bedrooms -->
+        <!-- Row 2: Bedrooms | Features | Reference Number -->
         <select name="bedrooms">
             <option value="">All Bedrooms</option>
             <?php foreach (get_unique_acf_values_sorted('bedrooms', true) as $beds): ?>
@@ -182,60 +178,45 @@ $active_features = isset($_GET['features']) && is_array($_GET['features'])
             <?php endforeach; ?>
         </select>
 
-        <!-- Reference Number -->
-        <input type="text" name="reference_number" placeholder="Reference Number" value="<?php echo esc_attr($selected_ref); ?>">
-
-        <div class="feature-pills-row">
-          <span class="feature-pills-label">Property Features:</span>
-          <div class="feature-pills-track-wrap">
-            <div class="feature-pills-track">
-              <?php
-              foreach ( $feature_pill_options as $value => $label ) :
-                $is_active = in_array($value, $active_features, true);
-              ?>
-                <button type="button"
-                  class="feature-pill<?php echo $is_active ? ' is-active' : ''; ?>"
-                  data-feature="<?php echo esc_attr($value); ?>">
-                  <?php echo esc_html($label); ?>
-                  <?php if ($is_active) : ?><span class="feature-pill-x">&times;</span><?php endif; ?>
-                </button>
-                <input type="hidden"
-                  name="features[]"
-                  value="<?php echo esc_attr($value); ?>"
-                  class="feature-pill-input"
-                  <?php echo $is_active ? '' : 'disabled'; ?>>
-              <?php endforeach; ?>
-            </div>
-            <div class="feature-pills-scroll-hint">
-              <svg width="8" height="14" viewBox="0 0 8 14" fill="none"
-                xmlns="http://www.w3.org/2000/svg">
-                <path d="M1 1L7 7L1 13" stroke="white" stroke-width="1.5"
-                  stroke-linecap="round" stroke-linejoin="round"/>
+        <div class="property-filter-col features-filter-col">
+          <div class="features-dropdown" id="features-dropdown-mobile">
+            <button type="button" class="features-dropdown__toggle" aria-expanded="false" aria-controls="features-panel-mobile">
+              <span class="features-dropdown__label">Features<?php
+                if ( ! empty( $active_features ) ) {
+                  echo ' (' . count( $active_features ) . ')';
+                }
+              ?></span>
+              <svg class="features-dropdown__chevron" width="10" height="6" viewBox="0 0 10 6" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M1 1L5 5L9 1" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
               </svg>
+            </button>
+            <div class="features-dropdown__panel" id="features-panel-mobile" role="group" aria-label="Property features">
+              <?php foreach ( get_feature_options() as $value => $label ) :
+                $checked = in_array( $value, $active_features, true ) ? 'checked' : '';
+              ?>
+                <label class="features-dropdown__option">
+                  <input type="checkbox" name="features[]" value="<?php echo esc_attr( $value ); ?>" <?php echo $checked; ?>>
+                  <span class="features-dropdown__option-text"><?php echo esc_html( $label ); ?></span>
+                  <span class="features-dropdown__tick"><?php echo $checked ? '&#10003;' : ''; ?></span>
+                </label>
+              <?php endforeach; ?>
             </div>
           </div>
         </div>
 
-        <button type="submit">Search Properties</button>
-        <button type="button" id="reset-filter">Reset</button>
-        <script>
-        document.getElementById('reset-filter').onclick = function() {
-            const form = this.closest('form');
-            form.reset();
+        <input type="text" name="reference_number" placeholder="Reference Number" value="<?php echo esc_attr($selected_ref); ?>">
 
-            // Reload the page without any query parameters only if there are parameters
-            if (window.location.search.length > 1) {
-                window.location.href = window.location.pathname;
-            }
-        };
-        </script>
+        <div class="property-filter-inline-actions">
+          <a href="<?php echo esc_url(get_post_type_archive_link('property')); ?>" class="reset-filters-link">Reset Filters</a>
+          <button type="submit">Search Properties</button>
+        </div>
     </form>
     </div>
     </div>
 
     <form class="property-filter-form" method="GET" action="<?php echo esc_url(get_post_type_archive_link('property')); ?>">
 
-        <!-- Location (taxonomy) -->
+        <!-- Row 1: Location | Type | Min Price | Max Price -->
         <select name="locations">
             <option value="">All Locations</option>
             <?php
@@ -246,7 +227,6 @@ $active_features = isset($_GET['features']) && is_array($_GET['features'])
             ?>
         </select>
 
-        <!-- Property Type (taxonomy) -->
         <select name="property-type">
             <option value="">All Types of Property</option>
             <?php
@@ -259,32 +239,26 @@ $active_features = isset($_GET['features']) && is_array($_GET['features'])
             }
             ?>
         </select>
-		
-		<!-- Min Price -->
-		<select name="price_min" class="min-price">
-			<option value="">Min Price</option>
-			<?php foreach ($price_options as $price): ?>
-				<option value="<?php echo esc_attr($price); ?>" <?php selected((string)$selected_min, (string)$price); ?>>
-					€<?php echo number_format($price); ?>
-				</option>
-			<?php endforeach; ?>
-		</select>
 
+        <select name="price_min" class="min-price">
+            <option value="">Min Price</option>
+            <?php foreach ($price_options as $price): ?>
+                <option value="<?php echo esc_attr($price); ?>" <?php selected((string)$selected_min, (string)$price); ?>>
+                    €<?php echo number_format($price); ?>
+                </option>
+            <?php endforeach; ?>
+        </select>
 
-        <button type="button" id="reset-filter1">Reset Filters</button>
-        <script>
-        document.getElementById('reset-filter1').onclick = function() {
-            const form = this.closest('form');
-            form.reset();
+        <select name="price_max" class="max-price">
+            <option value="">Max Price</option>
+            <?php foreach ($price_options as $price): ?>
+                <option value="<?php echo esc_attr($price); ?>" <?php selected((string)$selected_max, (string)$price); ?>>
+                    €<?php echo number_format($price); ?>
+                </option>
+            <?php endforeach; ?>
+        </select>
 
-            // Reload the page without any query parameters only if there are parameters
-            if (window.location.search.length > 1) {
-                window.location.href = window.location.pathname;
-            }
-        };
-        </script>
-
-        <!-- Bedrooms -->
+        <!-- Row 2: Bedrooms | Features | Reference Number -->
         <select name="bedrooms">
             <option value="">All Bedrooms</option>
             <?php foreach (get_unique_acf_values_sorted('bedrooms', true) as $beds): ?>
@@ -294,50 +268,37 @@ $active_features = isset($_GET['features']) && is_array($_GET['features'])
             <?php endforeach; ?>
         </select>
 
-        <!-- Reference Number -->
-        <input type="text" name="reference_number" placeholder="Reference Number" value="<?php echo esc_attr($selected_ref); ?>">
-
-		<!-- Max Price -->
-		<select name="price_max" class="max-price">
-			<option value="">Max Price</option>
-			<?php foreach ($price_options as $price): ?>
-				<option value="<?php echo esc_attr($price); ?>" <?php selected((string)$selected_max, (string)$price); ?>>
-					€<?php echo number_format($price); ?>
-				</option>
-			<?php endforeach; ?>
-		</select>
-        <button type="submit">Search Properties</button>
-
-        <div class="feature-pills-row">
-          <span class="feature-pills-label">Property Features:</span>
-          <div class="feature-pills-track-wrap">
-            <div class="feature-pills-track">
-              <?php
-              foreach ( $feature_pill_options as $value => $label ) :
-                $is_active = in_array($value, $active_features, true);
+        <div class="property-filter-col features-filter-col">
+          <div class="features-dropdown" id="features-dropdown-desktop">
+            <button type="button" class="features-dropdown__toggle" aria-expanded="false" aria-controls="features-panel-desktop">
+              <span class="features-dropdown__label">Features<?php
+                if ( ! empty( $active_features ) ) {
+                  echo ' (' . count( $active_features ) . ')';
+                }
+              ?></span>
+              <svg class="features-dropdown__chevron" width="10" height="6" viewBox="0 0 10 6" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M1 1L5 5L9 1" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </button>
+            <div class="features-dropdown__panel" id="features-panel-desktop" role="group" aria-label="Property features">
+              <?php foreach ( get_feature_options() as $value => $label ) :
+                $checked = in_array( $value, $active_features, true ) ? 'checked' : '';
               ?>
-                <button type="button"
-                  class="feature-pill<?php echo $is_active ? ' is-active' : ''; ?>"
-                  data-feature="<?php echo esc_attr($value); ?>">
-                  <?php echo esc_html($label); ?>
-                  <?php if ($is_active) : ?><span class="feature-pill-x">&times;</span><?php endif; ?>
-                </button>
-                <input type="hidden"
-                  name="features[]"
-                  value="<?php echo esc_attr($value); ?>"
-                  class="feature-pill-input"
-                  <?php echo $is_active ? '' : 'disabled'; ?>>
+                <label class="features-dropdown__option">
+                  <input type="checkbox" name="features[]" value="<?php echo esc_attr( $value ); ?>" <?php echo $checked; ?>>
+                  <span class="features-dropdown__option-text"><?php echo esc_html( $label ); ?></span>
+                  <span class="features-dropdown__tick"><?php echo $checked ? '&#10003;' : ''; ?></span>
+                </label>
               <?php endforeach; ?>
             </div>
-            <div class="feature-pills-scroll-hint">
-              <svg width="8" height="14" viewBox="0 0 8 14" fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-                aria-hidden="true" focusable="false">
-                <path d="M1 1L7 7L1 13" stroke="white" stroke-width="1.5"
-                  stroke-linecap="round" stroke-linejoin="round"/>
-              </svg>
-            </div>
           </div>
+        </div>
+
+        <input type="text" name="reference_number" placeholder="Reference Number" value="<?php echo esc_attr($selected_ref); ?>">
+
+        <div class="property-filter-inline-actions">
+          <a href="<?php echo esc_url(get_post_type_archive_link('property')); ?>" class="reset-filters-link">Reset Filters</a>
+          <button type="submit">Search Properties</button>
         </div>
     </form>
 </div>

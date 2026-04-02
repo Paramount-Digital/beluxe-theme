@@ -31,6 +31,11 @@ $selected_features = isset($_GET['features']) && is_array($_GET['features'])
         usort( $property_grid, function( $a, $b ) {
           return (float) get_field( 'for_sale_price', $b->ID ) - (float) get_field( 'for_sale_price', $a->ID );
         });
+      } else {
+        // 'recent' — sort by post date, newest first
+        usort( $property_grid, function( $a, $b ) {
+          return strtotime( $b->post_date ) - strtotime( $a->post_date );
+        });
       }
 
       // Filter by selected features

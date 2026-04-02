@@ -389,33 +389,29 @@ add_shortcode('property_filter', 'property_filter_shortcode');
 // Feature keywords map for property feature matching
 function get_feature_keywords() {
     return [
-        'close_to_golf'   => ['close to golf', 'golf'],
-        'country_view'    => ['country view', 'countryside'],
+        'beachfront'      => ['beachfront', 'front line beach', 'frontline beach'],
+        'beachside'       => ['beachside', 'beach side'],
+        'frontline_golf'  => ['frontline golf', 'front line golf'],
+        'sea_views'       => ['sea view', 'sea views'],
         'mountain_view'   => ['mountain view', 'mountain'],
-        'panoramic_view'  => ['panoramic view', 'panoramic'],
-        'sea_view'        => ['sea view'],
-        'gated_community' => ['gated community', 'gated'],
-        'beachside'       => ['beach', 'beachside', 'front line beach'],
-        'balcony'         => ['balcony', 'terrace'],
-        'city_views'      => ['city view', 'urban view', 'city'],
-        'indoor_pool'     => ['indoor pool'],
-        'jacuzzi'         => ['jacuzzi'],
+        'golf_views'      => ['golf view', 'golf views', 'close to golf', 'golf'],
+        'gated_complex'   => ['gated complex', 'gated community', 'gated'],
+        'security_24hr'   => ['24 hour security', '24hr security', 'security'],
+        'new_development' => ['new development', 'new build'],
     ];
 }
 
 function get_feature_options() {
     return [
-        'close_to_golf'   => 'Close to Golf',
-        'country_view'    => 'Country View',
-        'mountain_view'   => 'Mountain View',
-        'panoramic_view'  => 'Panoramic View',
-        'sea_view'        => 'Sea View',
-        'gated_community' => 'Gated Community',
+        'beachfront'      => 'Beachfront',
         'beachside'       => 'Beachside',
-        'balcony'         => 'Balcony',
-        'city_views'      => 'City Views',
-        'indoor_pool'     => 'Indoor Pool',
-        'jacuzzi'         => 'Jacuzzi',
+        'frontline_golf'  => 'Frontline Golf',
+        'sea_views'       => 'Sea Views',
+        'mountain_view'   => 'Mountain View',
+        'golf_views'      => 'Golf Views',
+        'gated_complex'   => 'Gated Complex',
+        'security_24hr'   => '24 Hour Security',
+        'new_development' => 'New Development',
     ];
 }
 
