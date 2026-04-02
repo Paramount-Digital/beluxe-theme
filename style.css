@@ -2922,19 +2922,6 @@ span.page-numbers.current {
     min-width: 120px; 
 }
 
-.property-filter-form-mobile #reset-filter {
-    display: flex;
-    margin: auto;
-    color: #FFF;
-    text-align: center;
-    font-family: Satoshi;
-    font-size: 15px;
-    font-style: normal;
-    font-weight: 300;
-    line-height: normal;
-    letter-spacing: 0.75px;
-}
-
 .property-filter-form-mobile button[type="submit"] {
     font-size: 13px;
 }
