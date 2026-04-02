@@ -35,71 +35,60 @@ document.addEventListener(
 				});
 			}
 
-			// Features: single-select pill with multi-select behaviour via hidden inputs
-			const featuresSelect = document.getElementById('property-features');
-			if (featuresSelect) {
-				const form = featuresSelect.closest('form');
-				let selectedFeatures = Array.from(
-					form.querySelectorAll('input[name="features[]"]')
-				).map(i => i.value).filter(Boolean);
+			// Features custom checkbox dropdown
+			document.querySelectorAll('.features-dropdown').forEach(function(dropdown) {
+				var toggle = dropdown.querySelector('.features-dropdown__toggle');
+				var panel = dropdown.querySelector('.features-dropdown__panel');
+				var label = dropdown.querySelector('.features-dropdown__label');
+				var checkboxes = dropdown.querySelectorAll('input[type="checkbox"]');
 
-				const featuresChoices = new Choices(featuresSelect, {
-					searchEnabled: false,
-					shouldSort: false,
-					itemSelectText: '',
+				// Toggle open/close
+				toggle.addEventListener('click', function(e) {
+					e.preventDefault();
+
+					// Close any other open features dropdowns
+					document.querySelectorAll('.features-dropdown.is-open').forEach(function(other) {
+						if (other !== dropdown) other.classList.remove('is-open');
+					});
+
+					dropdown.classList.toggle('is-open');
 				});
 
-				function updateFeaturesLabel() {
-					const opts = featuresSelect.options;
-					const labels = selectedFeatures.map(val => {
-						const opt = Array.from(opts).find(o => o.value === val);
-						return opt ? opt.text : val;
+				// Handle checkbox changes
+				checkboxes.forEach(function(cb) {
+					cb.addEventListener('change', function() {
+						var tick = this.closest('.features-dropdown__option').querySelector('.features-dropdown__tick');
+						tick.textContent = this.checked ? '\u2713' : '';
+						updateLabel();
 					});
-					if (labels.length === 0) {
-						featuresChoices.setChoiceByValue('');
-					} else if (labels.length === 1) {
-						featuresChoices.setChoiceByValue(selectedFeatures[0]);
-					} else {
-						const inner = featuresSelect.closest('.choices');
-						if (inner) {
-							const span = inner.querySelector('.choices__item--selectable');
-							if (span) span.textContent = labels[0] + ' +' + (labels.length - 1);
-						}
-					}
+				});
+
+				function updateLabel() {
+					var count = dropdown.querySelectorAll('input[type="checkbox"]:checked').length;
+					label.textContent = count > 0 ? 'Features (' + count + ')' : 'Features';
 				}
 
-				updateFeaturesLabel();
-
-				featuresSelect.addEventListener('change', function() {
-					const val = this.value;
-					if (!val) {
-						selectedFeatures = [];
-					} else if (selectedFeatures.includes(val)) {
-						selectedFeatures = selectedFeatures.filter(f => f !== val);
-					} else {
-						selectedFeatures.push(val);
+				// Close on outside click
+				document.addEventListener('click', function(e) {
+					if (!dropdown.contains(e.target)) {
+						dropdown.classList.remove('is-open');
 					}
-
-					form.querySelectorAll('input[name="features[]"]').forEach(i => i.remove());
-
-					selectedFeatures.forEach(f => {
-						const hidden = document.createElement('input');
-						hidden.type = 'hidden';
-						hidden.name = 'features[]';
-						hidden.value = f;
-						form.appendChild(hidden);
-					});
-
-					updateFeaturesLabel();
-					setTimeout(() => form.submit(), 50);
 				});
-			}
+
+				// Close on Escape
+				document.addEventListener('keydown', function(e) {
+					if (e.key === 'Escape' && dropdown.classList.contains('is-open')) {
+						dropdown.classList.remove('is-open');
+						toggle.focus();
+					}
+				});
+			});
 
 			const select_elements = document.querySelectorAll('select');
 			//apply Choices to all select elements
 			select_elements?.forEach(select => {
 				// Skip selects already initialised above
-				if (select.id === 'property-sort' || select.id === 'property-features') return;
+				if (select.id === 'property-sort') return;
 
 				// Check if this is a price dropdown
 				const isPriceSelect = select.name === 'price_min' || select.name === 'price_max';
@@ -112,91 +101,6 @@ document.addEventListener(
 			});
 
 		}
-
-		// Feature pills toggle (with drag guard)
-		document.querySelectorAll('.feature-pill').forEach(pill => {
-			pill.addEventListener('click', function() {
-				if (this.closest('.feature-pills-track')?.dataset.dragging === 'true') return;
-
-				const feature = this.dataset.feature;
-				const form = this.closest('form');
-				const input = form.querySelector(
-					'input.feature-pill-input[value="' + feature + '"]'
-				);
-				const isActive = this.classList.contains('is-active');
-
-				if (isActive) {
-					this.classList.remove('is-active');
-					this.querySelector('.feature-pill-x')?.remove();
-					if (input) input.disabled = true;
-				} else {
-					this.classList.add('is-active');
-					if (!this.querySelector('.feature-pill-x')) {
-						const x = document.createElement('span');
-						x.className = 'feature-pill-x';
-						x.textContent = '\u00d7';
-						this.appendChild(x);
-					}
-					if (input) input.disabled = false;
-				}
-			});
-		});
-
-		// Drag to scroll feature pills track
-		document.querySelectorAll('.feature-pills-track').forEach(track => {
-			let isDown = false;
-			let startX;
-			let scrollLeft;
-			let startMouseX;
-
-			track.addEventListener('mousedown', e => {
-				isDown = true;
-				startMouseX = e.pageX;
-				track.dataset.dragging = 'false';
-				track.classList.add('is-dragging');
-				startX = e.pageX - track.offsetLeft;
-				scrollLeft = track.scrollLeft;
-				e.preventDefault();
-			});
-
-			track.addEventListener('mouseleave', () => {
-				isDown = false;
-				track.classList.remove('is-dragging');
-			});
-
-			track.addEventListener('mouseup', () => {
-				isDown = false;
-				track.classList.remove('is-dragging');
-				// Reset drag flag after a tick so click handler can read it
-				setTimeout(() => { track.dataset.dragging = 'false'; }, 10);
-			});
-
-			track.addEventListener('mousemove', e => {
-				if (!isDown) return;
-				e.preventDefault();
-				// Mark as dragging if moved more than 5px
-				if (Math.abs(e.pageX - startMouseX) > 5) {
-					track.dataset.dragging = 'true';
-				}
-				const x = e.pageX - track.offsetLeft;
-				const walk = (x - startX) * 1.5;
-				track.scrollLeft = scrollLeft - walk;
-			});
-		});
-
-		// Feature pills scroll hint
-		document.querySelectorAll('.feature-pills-track').forEach(track => {
-			const wrap = track.closest('.feature-pills-track-wrap');
-			if (!wrap) return;
-
-			function updateScrollHint() {
-				const atEnd = track.scrollLeft + track.clientWidth >= track.scrollWidth - 4;
-				wrap.classList.toggle('is-end', atEnd);
-			}
-
-			track.addEventListener('scroll', updateScrollHint);
-			updateScrollHint(); // run on init
-		});
 
 		// close all details elements on click
 		const details_elements = document.querySelectorAll('details');

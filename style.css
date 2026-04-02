@@ -2589,6 +2589,150 @@ span.page-numbers.current {
 	white-space: nowrap;
 }
 
+/* Features checkbox dropdown — matches Choices.js single-select appearance */
+
+.features-filter-col {
+  position: relative;
+}
+
+.features-dropdown {
+  position: relative;
+  width: 100%;
+}
+
+/* Toggle button — identical to Choices.js single-select pill */
+.features-dropdown__toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  background: rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(5px);
+  border: 1.5px solid #737373;
+  border-radius: 26px;
+  padding: 0 20px;
+  height: 46px; /* match single-select — adjust if DevTools says different */
+  font-family: Satoshi, sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  color: #ffffff;
+  cursor: pointer;
+  box-sizing: border-box;
+  transition: border-color 0.2s;
+}
+
+.features-dropdown__toggle:hover {
+  border-color: #999999;
+}
+
+.features-dropdown.is-open .features-dropdown__toggle {
+  border-color: #BFA570;
+}
+
+.features-dropdown__chevron {
+  flex-shrink: 0;
+  transition: transform 0.2s;
+}
+
+.features-dropdown.is-open .features-dropdown__chevron {
+  transform: rotate(180deg);
+}
+
+/* Dropdown panel */
+.features-dropdown__panel {
+  display: none;
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  z-index: 100;
+  border-radius: 12px;
+  border: 1.5px solid #737373;
+  background: rgba(30, 30, 30, 0.95);
+  backdrop-filter: blur(10px);
+  padding: 6px 0;
+  max-height: 260px;
+  overflow-y: auto;
+}
+
+.features-dropdown.is-open .features-dropdown__panel {
+  display: block;
+}
+
+/* Scrollbar styling for the panel */
+.features-dropdown__panel::-webkit-scrollbar {
+  width: 4px;
+}
+
+.features-dropdown__panel::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.features-dropdown__panel::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 2px;
+}
+
+/* Individual option rows */
+.features-dropdown__option {
+  display: flex;
+  align-items: center;
+  padding: 9px 16px;
+  cursor: pointer;
+  transition: background-color 0.15s;
+  user-select: none;
+}
+
+.features-dropdown__option:hover {
+  background-color: rgba(191, 165, 112, 0.2);
+}
+
+/* Hide the native checkbox */
+.features-dropdown__option input[type="checkbox"] {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+  pointer-events: none;
+}
+
+/* Option text */
+.features-dropdown__option-text {
+  flex: 1;
+  font-family: Satoshi, sans-serif;
+  font-size: 13px;
+  font-weight: 400;
+  color: #ffffff;
+  letter-spacing: 0.3px;
+}
+
+/* Checkmark tick */
+.features-dropdown__tick {
+  width: 18px;
+  text-align: center;
+  color: #BFA570;
+  font-size: 14px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+/* Selected option row has subtle gold tint */
+.features-dropdown__option:has(input:checked) {
+  background-color: rgba(191, 165, 112, 0.08);
+}
+
+.features-dropdown__option:has(input:checked):hover {
+  background-color: rgba(191, 165, 112, 0.2);
+}
+
+.property-filter-form .property-filter-actions {
+  grid-column: 3 / -1;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 16px;
+}
+
 /* Overrides Choices.js library styles which use high-specificity
    rules. Scoped to .property-filter-controls only. */
 .property-filter-controls .choices {
@@ -2793,113 +2937,6 @@ span.page-numbers.current {
 	color: var(--light-gold);
 	border-color: var(--light-gold);
 	backdrop-filter: blur(5px);
-}
-
-/* Feature Pills Row */
-.feature-pills-row {
-  grid-column: 1 / -1;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  overflow: hidden;
-}
-
-.feature-pills-label {
-  font-family: Satoshi, sans-serif;
-  font-size: 14px;
-  font-weight: 500;
-  color: #ffffff;
-  letter-spacing: 0.7px;
-  white-space: nowrap;
-}
-
-.feature-pills-track {
-  display: flex;
-  gap: 8px;
-  overflow-x: auto;
-  scrollbar-width: none;
-  -ms-overflow-style: none;
-  flex: 1;
-  padding-bottom: 2px;
-  cursor: grab;
-}
-
-.feature-pills-track.is-dragging {
-  cursor: grabbing;
-  user-select: none;
-}
-
-.feature-pills-track::-webkit-scrollbar {
-  display: none;
-}
-
-.feature-pills-track-wrap {
-  position: relative;
-  flex: 1;
-  overflow: hidden;
-}
-
-.feature-pills-track-wrap::after {
-  content: '';
-  position: absolute;
-  top: 0;
-  right: 28px;
-  width: 60px;
-  height: 100%;
-  background: linear-gradient(to right, transparent, rgba(0,0,0,0.4));
-  pointer-events: none;
-  transition: opacity 0.3s;
-}
-
-.feature-pills-track-wrap.is-end::after {
-  opacity: 0;
-}
-
-.feature-pills-scroll-hint {
-  position: absolute;
-  right: 0;
-  top: 50%;
-  transform: translateY(-50%);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 24px;
-  height: 24px;
-  pointer-events: none;
-  transition: opacity 0.3s;
-}
-
-.feature-pills-track-wrap.is-end .feature-pills-scroll-hint {
-  opacity: 0;
-}
-
-.feature-pill {
-  flex-shrink: 0;
-  background: rgba(255, 255, 255, 0.12);
-  backdrop-filter: blur(35px);
-  border: none;
-  border-radius: 26px;
-  padding: 3px 12px;
-  font-family: Satoshi, sans-serif;
-  font-size: 11px;
-  font-weight: 500;
-  color: #ffffff;
-  letter-spacing: 0.5px;
-  cursor: grab;
-  transition: background 0.2s, border-color 0.2s, color 0.2s;
-  white-space: nowrap;
-}
-
-.feature-pill.is-active {
-  background: #BFA570;
-  border-color: #BFA570;
-  color: #ffffff;
-}
-
-.feature-pill-x {
-  margin-left: 6px;
-  font-size: 15px;
-  line-height: 1;
 }
 
 /* Mobile Modal Trigger Button */
