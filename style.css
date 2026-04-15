@@ -2601,7 +2601,8 @@ span.page-numbers.current {
 }
 
 /* Toggle button — identical to Choices.js single-select pill */
-.features-dropdown__toggle {
+.property-filter-form .features-dropdown__toggle,
+.property-filter-form-mobile .features-dropdown__toggle {
   display: flex;
   align-items: center;
   justify-content: space-between;
