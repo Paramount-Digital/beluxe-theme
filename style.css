@@ -2620,6 +2620,20 @@ span.page-numbers.current {
   cursor: pointer;
   box-sizing: border-box;
   transition: border-color 0.2s;
+  position: relative;
+}
+
+.property-filter-form .features-dropdown__toggle::after,
+.property-filter-form-mobile .features-dropdown__toggle::after {
+  border: unset;
+  width: 18px;
+  height: 18px;
+  top: 50%;
+  transform: translateY(-50%);
+  margin: 0;
+  right: 16px;
+  position: absolute;
+  content: url("data:image/svg+xml,%3Csvg width='18' height='18' viewBox='0 0 18 18' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M14.625 6.75L9 12.375L3.375 6.75' stroke='white' stroke-width='1.83333' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E%0A");
 }
 
 .features-dropdown__toggle:hover {
@@ -2631,8 +2645,7 @@ span.page-numbers.current {
 }
 
 .features-dropdown__chevron {
-  flex-shrink: 0;
-  transition: transform 0.2s;
+  display: none;
 }
 
 .features-dropdown.is-open .features-dropdown__chevron {
@@ -2647,11 +2660,12 @@ span.page-numbers.current {
   left: 0;
   right: 0;
   z-index: 100;
-  border-radius: 12px;
-  border: 1.5px solid #737373;
-  background: rgba(30, 30, 30, 0.95);
-  backdrop-filter: blur(10px);
-  padding: 6px 0;
+  border-radius: 2.5px;
+  border: 1px solid #e0e0e0;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  background: #ffffff;
+  backdrop-filter: none;
+  padding: 0;
   max-height: 260px;
   overflow-y: auto;
 }
@@ -2660,25 +2674,11 @@ span.page-numbers.current {
   display: block;
 }
 
-/* Scrollbar styling for the panel */
-.features-dropdown__panel::-webkit-scrollbar {
-  width: 4px;
-}
-
-.features-dropdown__panel::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-.features-dropdown__panel::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.2);
-  border-radius: 2px;
-}
-
 /* Individual option rows */
 .features-dropdown__option {
-  display: flex;
-  align-items: center;
-  padding: 9px 16px;
+  display: block;
+  position: relative;
+  padding: 10px;
   cursor: pointer;
   transition: background-color 0.15s;
   user-select: none;
@@ -2690,7 +2690,7 @@ span.page-numbers.current {
 }
 
 .features-dropdown__option:hover {
-  background-color: rgba(191, 165, 112, 0.2);
+  background-color: #f2f2f2;
 }
 
 /* Visually hide the native checkbox but keep it focusable for accessibility */
@@ -2709,31 +2709,33 @@ span.page-numbers.current {
 
 /* Option text */
 .features-dropdown__option-text {
-  flex: 1;
   font-family: Satoshi, sans-serif;
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 400;
-  color: #ffffff;
-  letter-spacing: 0.3px;
+  color: #333333;
+  letter-spacing: normal;
 }
 
 /* Checkmark tick */
 .features-dropdown__tick {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
   width: 18px;
   text-align: center;
-  color: #BFA570;
+  color: #333333;
   font-size: 14px;
   font-weight: 700;
-  flex-shrink: 0;
 }
 
 /* Selected option row has subtle gold tint */
 .features-dropdown__option:has(input:checked) {
-  background-color: rgba(191, 165, 112, 0.08);
+  background-color: #f5f5f5;
 }
 
 .features-dropdown__option:has(input:checked):hover {
-  background-color: rgba(191, 165, 112, 0.2);
+  background-color: #f2f2f2;
 }
 
 /* Filter actions — sits in the 4th column of row 2 */
@@ -2745,6 +2747,20 @@ span.page-numbers.current {
   align-items: center;
   justify-content: flex-end;
   gap: 12px;
+}
+
+.property-filter-form-mobile .property-filter-inline-actions,
+.property-filter-form-mobile .property-filter-actions {
+  margin-top: 16px;
+  padding-bottom: 16px;
+  justify-content: center;
+  gap: 43px;
+}
+
+.property-filter-form-mobile select,
+.property-filter-form-mobile input[type="text"],
+.property-filter-form-mobile .features-filter-col {
+  margin-bottom: 12px;
 }
 
 .reset-filters-link {
@@ -2760,6 +2776,11 @@ span.page-numbers.current {
 
 .reset-filters-link:hover {
   opacity: 0.7;
+}
+
+.property-filter-form .reset-filters-link,
+.property-filter-form-mobile .reset-filters-link {
+  color: #ffffff !important; /* !important — overridden by a:visited global rule */
 }
 
 /* Overrides Choices.js library styles which use high-specificity
