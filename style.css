@@ -2930,7 +2930,7 @@ span.page-numbers.current {
 /* Property Filter Form Buttons */
 .property-filter-form button,
 .property-filter-form-mobile button {
-    background: none;
+    background: rgba(255, 255, 255, 0.12);
     color: #FFF;
     font-family: Satoshi;
     font-size: 15px;
