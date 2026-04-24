@@ -49,15 +49,8 @@ $current_sort = isset($_GET['sortby']) ? sanitize_text_field($_GET['sortby']) : 
 
 						<div class="property-content">
 							<?php
-							// Get first location term for THIS post (robust against WP_Error/empty)
-							$first_location = '';
-							$location_terms = get_the_terms(get_the_ID(), 'locations');
-							if ( ! is_wp_error($location_terms) && ! empty($location_terms) && is_array($location_terms) ) {
-								$first = reset($location_terms);
-								if ($first && isset($first->name)) {
-									$first_location = $first->name;
-								}
-							}
+							$location_term  = beluxe_get_deepest_location( get_the_ID() );
+							$first_location = $location_term ? $location_term->name : '';
 							?>
 							<p class="property-location"><?php echo esc_html($first_location); ?></p>
 

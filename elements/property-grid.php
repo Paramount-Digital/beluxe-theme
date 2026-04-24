@@ -62,8 +62,8 @@ $selected_features = isset($_GET['features']) && is_array($_GET['features'])
           $thumb     = get_property_featured_image( $pid, 'medium' );
 
           // Location
-          $location_terms = get_the_terms( $pid, 'locations' );
-          $first_location = ( $location_terms && ! is_wp_error( $location_terms ) ) ? $location_terms[0]->name : '';
+          $location_term  = beluxe_get_deepest_location( $pid );
+          $first_location = $location_term ? $location_term->name : '';
 
           // Custom fields
           $bedrooms   = get_post_meta( $pid, 'bedrooms', true );
@@ -186,8 +186,8 @@ $selected_features = isset($_GET['features']) && is_array($_GET['features'])
             $excerpt   = get_the_excerpt( $property_post );
             $thumb     = get_property_featured_image( $pid, 'medium' );
 
-            $location_terms = get_the_terms( $pid, 'locations' );
-            $first_location = ( $location_terms && ! is_wp_error( $location_terms ) ) ? $location_terms[0]->name : '';
+            $location_term  = beluxe_get_deepest_location( $pid );
+            $first_location = $location_term ? $location_term->name : '';
 
             $bedrooms   = get_post_meta( $pid, 'bedrooms', true );
             $bathrooms  = get_post_meta( $pid, 'bathrooms', true );

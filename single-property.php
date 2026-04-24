@@ -17,8 +17,8 @@ get_header(); ?>
     $buildSize = get_field('build_size');
     $terraceSize = get_field('terrace_size');
     $plotSize = get_field('plot_size');
-    $location_terms = get_the_terms(get_the_ID(), 'locations');
-    $first_location = $location_terms[0]->name;
+    $location_term  = beluxe_get_deepest_location( get_the_ID() );
+    $first_location = $location_term ? $location_term->name : '';
 ?>
 
 <section class="single-property-listing">
