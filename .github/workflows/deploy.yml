@@ -13,14 +13,14 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Prepare deployment (remove unnecessary files)
+      - name: Prepare deployment
         run: |
           rm -rf .git
           rm -rf .github
           rm -rf node_modules
 
-      - name: Upload theme to Kinsta via SSH (rsync)
-        uses: appleboy/rsync-action@v0.1.0
+      - name: Deploy via SCP
+        uses: appleboy/scp-action@v0.1.7
         with:
           host: ${{ secrets.KINSTA_HOST }}
           username: ${{ secrets.KINSTA_USERNAME }}
@@ -28,5 +28,4 @@ jobs:
           port: ${{ secrets.KINSTA_PORT }}
           source: "."
           target: "/www/beluxeproperties_804/public/wp-content/themes/beluxe-theme"
-          exclude: ".git,.github,node_modules,.DS_Store"
-          delete: true
+          rm: true
