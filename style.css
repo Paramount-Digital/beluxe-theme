@@ -2952,6 +2952,21 @@ span.page-numbers.current {
 	backdrop-filter: blur(5px);
 }
 
+/* Mobile filter spacing */
+.property-filter-form-mobile .features-dropdown__toggle {
+  margin-bottom: 12px;
+}
+
+.property-filter-form-mobile .property-filter-col,
+.property-filter-form-mobile .features-filter-col {
+  margin-bottom: 8px;
+}
+
+.property-filter-form-mobile .property-filter-inline-actions {
+  margin-top: 8px;
+  gap: 40px;
+}
+
 /* Mobile Modal Trigger Button */
 .filter-modal-trigger {
     display: block;
