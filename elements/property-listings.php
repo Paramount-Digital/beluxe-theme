@@ -69,35 +69,49 @@ $current_sort = isset($_GET['sortby']) ? sanitize_text_field($_GET['sortby']) : 
 							$build_size = get_post_meta(get_the_ID(), 'build_size', true);
 							$plot_size  = get_post_meta(get_the_ID(), 'plot_size', true);
 
-							if ($bedrooms || $bathrooms || $build_size || $plot_size) :
+							$price_min     = get_post_meta( get_the_ID(), 'price_min', true );
+							$price_max     = get_post_meta( get_the_ID(), 'price_max', true );
+							$bedrooms_min  = get_post_meta( get_the_ID(), 'bedrooms_min', true );
+							$bedrooms_max  = get_post_meta( get_the_ID(), 'bedrooms_max', true );
+							$bathrooms_min = get_post_meta( get_the_ID(), 'bathrooms_min', true );
+							$bathrooms_max = get_post_meta( get_the_ID(), 'bathrooms_max', true );
+							$build_size_min = get_post_meta( get_the_ID(), 'build_size_min', true );
+							$build_size_max = get_post_meta( get_the_ID(), 'build_size_max', true );
+							$is_development = ! empty( $price_min );
+
+							$beds_display  = $is_development ? beluxe_format_stat_range( $bedrooms_min, $bedrooms_max ) : esc_html( $bedrooms );
+							$baths_display = $is_development ? beluxe_format_stat_range( $bathrooms_min, $bathrooms_max ) : esc_html( $bathrooms );
+							$size_display  = $is_development ? beluxe_format_stat_range( $build_size_min, $build_size_max, 'M²' ) : ( $build_size ? esc_html( $build_size ) . 'M²' : '' );
+
+							if ($beds_display || $baths_display || $size_display || $plot_size) :
 							?>
 								<div class="property-listing-details">
 
-									<?php if ($bedrooms) : ?>
+									<?php if ($beds_display) : ?>
 										<div class="property-listing-detail">
 											<img src="/wp-content/uploads/2025/08/bed_OFF-8.png" class="listing-icon" alt="Bedrooms Icon">
-											<p><?php echo $bedrooms; ?></p>
+											<p><?php echo wp_kses_post( $beds_display ); ?></p>
 										</div>
 									<?php endif; ?>
 
-									<?php if ($bathrooms) : ?>
+									<?php if ($baths_display) : ?>
 										<div class="property-listing-detail">
 											<img src="/wp-content/uploads/2025/08/BATHROOMS_OFF-8.png" class="listing-icon" alt="Bathrooms Icon">
-											<p><?php echo $bathrooms; ?></p>
+											<p><?php echo wp_kses_post( $baths_display ); ?></p>
 										</div>
 									<?php endif; ?>
 
-									<?php if ($build_size) : ?>
+									<?php if ($size_display) : ?>
 										<div class="property-listing-detail">
 											<img src="/wp-content/uploads/2025/08/HOUSE_OFF-8.png" class="listing-icon" alt="Build Size Icon">
-											<p><?php echo $build_size; ?>m²</p>
+											<p><?php echo wp_kses_post( $size_display ); ?></p>
 										</div>
 									<?php endif; ?>
 
 									<?php if ($plot_size) : ?>
 										<div class="property-listing-detail">
 											<img src="/wp-content/uploads/2025/08/PLOT_OFF-8.png" class="listing-icon" alt="Plot Size Icon">
-											<p><?php echo $plot_size; ?>m²</p>
+											<p><?php echo esc_html( $plot_size ); ?>M²</p>
 										</div>
 									<?php endif; ?>
 
@@ -108,8 +122,15 @@ $current_sort = isset($_GET['sortby']) ? sanitize_text_field($_GET['sortby']) : 
 							<p><?php echo get_the_excerpt(); ?></p>
 
 							<div class="property-price-sku">
-								<?php $price_raw = get_field('for_sale_price', get_the_ID()); $price = is_numeric($price_raw) ? (int) $price_raw : 0; ?>
-								<p class="listing-card-price">€<?php echo number_format($price); ?></p>
+								<?php if ( $is_development ) : ?>
+									<?php $price_formatted = beluxe_format_price_range( $price_min, $price_max ); ?>
+									<?php if ( $price_formatted ) : ?>
+										<p class="listing-card-price"><?php echo wp_kses_post( $price_formatted ); ?></p>
+									<?php endif; ?>
+								<?php else : ?>
+									<?php $price_raw = get_field('for_sale_price', get_the_ID()); $price = is_numeric($price_raw) ? (int) $price_raw : 0; ?>
+									<?php if ( $price ) : ?><p class="listing-card-price">€<?php echo number_format($price); ?></p><?php endif; ?>
+								<?php endif; ?>
 								<p class="listing-card-ref"><?php echo esc_html((string) get_field('reference_number', get_the_ID())); ?></p>
 							</div>
 

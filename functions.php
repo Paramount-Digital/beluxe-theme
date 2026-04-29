@@ -578,5 +578,24 @@ function ensure_external_gallery_is_string($post_id, $xml_node, $is_update) {
 add_action('pmxi_saved_post', 'ensure_external_gallery_is_string', 10, 3);
 
 
+if ( ! function_exists( 'beluxe_format_stat_range' ) ) :
+function beluxe_format_stat_range( $min, $max, $suffix = '' ) {
+    $suffix = esc_html( $suffix );
+    $min = is_numeric( $min ) ? (int) $min : 0;
+    $max = is_numeric( $max ) ? (int) $max : 0;
+    if ( ! $min ) return '';
+    if ( ! $max || $min === $max ) return esc_html( $min ) . $suffix;
+    return esc_html( $min ) . '&ndash;' . esc_html( $max ) . $suffix;
+}
+endif;
 
+if ( ! function_exists( 'beluxe_format_price_range' ) ) :
+function beluxe_format_price_range( $price_min, $price_max ) {
+    $min = (int) $price_min;
+    $max = (int) $price_max;
+    if ( ! $min ) return '';
+    if ( ! $max || $min === $max ) return 'From &euro;' . number_format( $min );
+    return '&euro;' . number_format( $min ) . ' &ndash; &euro;' . number_format( $max );
+}
+endif;
 

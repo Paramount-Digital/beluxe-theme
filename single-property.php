@@ -19,13 +19,30 @@ get_header(); ?>
     $plotSize = get_field('plot_size');
     $location_terms = get_the_terms(get_the_ID(), 'locations');
     $first_location = $location_terms[0]->name;
+
+    // Range fields for new developments
+    $price_min     = get_field('price_min');
+    $price_max     = get_field('price_max');
+    $bedrooms_min  = get_field('bedrooms_min');
+    $bedrooms_max  = get_field('bedrooms_max');
+    $bathrooms_min = get_field('bathrooms_min');
+    $bathrooms_max = get_field('bathrooms_max');
+    $build_size_min = get_field('build_size_min');
+    $build_size_max = get_field('build_size_max');
+    $is_development = ! empty( $price_min );
 ?>
 
 <section class="single-property-listing">
 
     <div class="container">
 
-        <?php if ( $yearBuilt || $bedrooms || $bathrooms || $buildSize || $terraceSize || $plotSize ) : ?>
+        <?php
+        $beds_display  = $is_development ? beluxe_format_stat_range( $bedrooms_min, $bedrooms_max ) : esc_html( $bedrooms );
+        $baths_display = $is_development ? beluxe_format_stat_range( $bathrooms_min, $bathrooms_max ) : esc_html( $bathrooms );
+        $size_display  = $is_development ? beluxe_format_stat_range( $build_size_min, $build_size_max, 'M²' ) : ( $buildSize ? esc_html( $buildSize ) . 'M²' : '' );
+        ?>
+
+        <?php if ( $yearBuilt || $beds_display || $baths_display || $size_display || $terraceSize || $plotSize ) : ?>
 
         <div class="property-details col-12">
             <?php if ($yearBuilt) : ?>
@@ -33,19 +50,19 @@ get_header(); ?>
                 <img src="/wp-content/uploads/2025/08/calendar_OFF-1.png"><p class="detail">Year Built</p><hr class="detail-sep"/><p class="value"><?php echo esc_html($yearBuilt); ?></p>
             </div>
             <?php endif; ?>
-            <?php if ($bedrooms) : ?>
+            <?php if ($beds_display) : ?>
             <div class="property-detail">
-                <img src="/wp-content/uploads/2025/08/bed_OFF-8.png"><p class="detail">Bedrooms</p><hr class="detail-sep"/><p class="value"><?php echo esc_html($bedrooms); ?></p>
+                <img src="/wp-content/uploads/2025/08/bed_OFF-8.png"><p class="detail">Bedrooms</p><hr class="detail-sep"/><p class="value"><?php echo wp_kses_post( $beds_display ); ?></p>
             </div>
             <?php endif; ?>
-            <?php if ($bathrooms) : ?>
+            <?php if ($baths_display) : ?>
             <div class="property-detail">
-                <img src="/wp-content/uploads/2025/08/BATHROOMS_OFF-8.png"><p class="detail">Bathrooms</p><hr class="detail-sep"/><p class="value"><?php echo esc_html($bathrooms); ?></p>
+                <img src="/wp-content/uploads/2025/08/BATHROOMS_OFF-8.png"><p class="detail">Bathrooms</p><hr class="detail-sep"/><p class="value"><?php echo wp_kses_post( $baths_display ); ?></p>
             </div>
             <?php endif; ?>
-            <?php if ($buildSize) : ?>
+            <?php if ($size_display) : ?>
             <div class="property-detail">
-                <img src="/wp-content/uploads/2025/08/HOUSE_OFF-8.png"><p class="detail">Built Size</p><hr class="detail-sep"/><p class="value"><?php echo esc_html($buildSize); ?>M²</p>
+                <img src="/wp-content/uploads/2025/08/HOUSE_OFF-8.png"><p class="detail">Built Size</p><hr class="detail-sep"/><p class="value"><?php echo wp_kses_post( $size_display ); ?></p>
             </div>
             <?php endif; ?>
             <?php if ($terraceSize) : ?>
