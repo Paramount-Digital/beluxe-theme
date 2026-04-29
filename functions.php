@@ -578,5 +578,45 @@ function ensure_external_gallery_is_string($post_id, $xml_node, $is_update) {
 add_action('pmxi_saved_post', 'ensure_external_gallery_is_string', 10, 3);
 
 
+if ( ! function_exists( 'beluxe_property_slug_from_reference' ) ) :
+function beluxe_property_slug_from_reference( $data, $postarr ) {
+    if ( $data['post_type'] !== 'property' ) {
+        return $data;
+    }
 
+    if ( ! in_array( $data['post_status'], [ 'publish', 'draft', 'pending', 'future' ], true ) ) {
+        return $data;
+    }
 
+    $ref = '';
+
+    if ( ! empty( $_POST['acf'] ) && is_array( $_POST['acf'] ) ) {
+        foreach ( $_POST['acf'] as $key => $value ) {
+            $field_obj = acf_get_field( $key );
+            if ( $field_obj && $field_obj['name'] === 'reference_number' ) {
+                $ref = sanitize_text_field( $value );
+                break;
+            }
+        }
+    }
+
+    // Fallback: read from saved post meta (covers WP All Import and programmatic saves)
+    if ( empty( $ref ) && ! empty( $postarr['ID'] ) ) {
+        $ref = get_field( 'reference_number', $postarr['ID'] );
+    }
+
+    if ( ! empty( $ref ) ) {
+        $new_slug = sanitize_title( $ref );
+
+        $existing = get_page_by_path( $new_slug, OBJECT, 'property' );
+        if ( $existing && (int) $existing->ID !== (int) $postarr['ID'] ) {
+            $new_slug = $new_slug . '-' . $postarr['ID'];
+        }
+
+        $data['post_name'] = $new_slug;
+    }
+
+    return $data;
+}
+add_filter( 'wp_insert_post_data', 'beluxe_property_slug_from_reference', 10, 2 );
+endif;
