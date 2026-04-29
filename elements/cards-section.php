@@ -3,7 +3,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
 }
 
-$element_content = get_sub_field( 'element_content' );
+$element_content            = get_sub_field( 'element_content' );
+$element_background_colour  = get_sub_field( 'element_background_colour' ) ?: '';
+$element_anchor             = get_sub_field( 'element_anchor' ) ?: '';
+$desktop_grid_style         = get_sub_field( 'desktop_grid_style' ) ?: '';
 // Build section classes
 $section_classes = ['cards-section', 'background-' . sanitize_html_class( $element_background_colour )];
 
@@ -56,7 +59,7 @@ $section_classes = ['cards-section', 'background-' . sanitize_html_class( $eleme
                             ?>
                         </figure>
                     <?php endif; ?>
-                    <?php echo wp_kses_post( $card_content ); ?>
+                    <?php echo wp_kses_post( $card_content ?? '' ); ?>
                 </div>
                 <?php endwhile; ?>
 

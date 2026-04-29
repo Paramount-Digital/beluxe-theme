@@ -577,6 +577,33 @@ function ensure_external_gallery_is_string($post_id, $xml_node, $is_update) {
 }
 add_action('pmxi_saved_post', 'ensure_external_gallery_is_string', 10, 3);
 
+if ( ! function_exists( 'beluxe_get_deepest_location' ) ) :
+function beluxe_get_deepest_location( $post_id ) {
+    $terms = get_the_terms( $post_id, 'locations' );
+    if ( ! $terms || is_wp_error( $terms ) ) {
+        return false;
+    }
+
+    $parent_ids = wp_list_pluck( $terms, 'parent' );
+    $leaf_terms = array_filter( $terms, function( $term ) use ( $parent_ids ) {
+        return ! in_array( $term->term_id, $parent_ids, true );
+    } );
+
+    if ( ! empty( $leaf_terms ) ) {
+        usort( $leaf_terms, function( $a, $b ) {
+            return count( get_ancestors( $b->term_id, 'locations', 'taxonomy' ) )
+                 - count( get_ancestors( $a->term_id, 'locations', 'taxonomy' ) );
+        } );
+        return reset( $leaf_terms );
+    }
+
+    return $terms[0];
+}
+endif;
+
+
+
+
 
 if ( ! function_exists( 'beluxe_property_slug_from_reference' ) ) :
 function beluxe_property_slug_from_reference( $data, $postarr ) {
@@ -600,7 +627,7 @@ function beluxe_property_slug_from_reference( $data, $postarr ) {
         }
     }
 
-    // Fallback: read from saved post meta (covers WP All Import and programmatic saves)
+    // Fallback: hardcoded field key from acf-json for performance
     if ( empty( $ref ) && ! empty( $postarr['ID'] ) ) {
         $ref = get_field( 'reference_number', $postarr['ID'] );
     }
@@ -619,4 +646,36 @@ function beluxe_property_slug_from_reference( $data, $postarr ) {
     return $data;
 }
 add_filter( 'wp_insert_post_data', 'beluxe_property_slug_from_reference', 10, 2 );
+endif;
+
+if ( ! function_exists( 'beluxe_handle_sold_property' ) ) :
+/**
+ * Intercept 404s on property URLs and serve a 410 Gone response.
+ * 410 prompts faster de-indexing by search engines than a standard 404.
+ */
+function beluxe_handle_sold_property() {
+    if ( ! is_404() ) {
+        return;
+    }
+
+    $request_uri = trim( $_SERVER['REQUEST_URI'], '/' );
+
+    // Strip query strings before matching
+    $request_uri = strtok( $request_uri, '?' );
+    $request_uri = trim( $request_uri, '/' );
+
+    if ( ! preg_match( '#^properties/[^/]+/?$#', $request_uri ) ) {
+        return;
+    }
+
+    status_header( 410 );
+    header( 'X-Robots-Tag: noindex' );
+
+    $template = get_stylesheet_directory() . '/templates/property-sold.php';
+    if ( file_exists( $template ) ) {
+        include $template;
+        exit;
+    }
+}
+add_action( 'template_redirect', 'beluxe_handle_sold_property' );
 endif;
