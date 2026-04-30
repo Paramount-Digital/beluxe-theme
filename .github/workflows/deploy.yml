@@ -1,4 +1,4 @@
-name: Deploy to Staging
+name: Deploy to Kinsta Staging
 
 on:
   push:
@@ -8,14 +8,24 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+
     steps:
-      - name: Deploy to Kinsta staging via SSH
-        uses: appleboy/ssh-action@v1.0.3
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Prepare deployment
+        run: |
+          rm -rf .git
+          rm -rf .github
+          rm -rf node_modules
+
+      - name: Deploy via SCP
+        uses: appleboy/scp-action@v0.1.7
         with:
           host: ${{ secrets.KINSTA_HOST }}
-          port: ${{ secrets.KINSTA_PORT }}
           username: ${{ secrets.KINSTA_USERNAME }}
           key: ${{ secrets.KINSTA_SSH_PRIVATE_KEY }}
-          script: |
-            cd /www/beluxeproperties_804/public/wp-content/themes/beluxe-theme
-            git pull origin main
+          port: ${{ secrets.KINSTA_PORT }}
+          source: "."
+          target: "/www/beluxeproperties_804/public/wp-content/themes/beluxe-theme"
+          rm: true
