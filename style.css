@@ -2627,7 +2627,9 @@ span.page-numbers.current {
 }
 
 .features-dropdown.is-open .features-dropdown__toggle {
-  border-color: #BFA570;
+  border-color: #d0d0d0;
+  border-radius: 26px 26px 0 0;
+  border-bottom-color: transparent;
 }
 
 .features-dropdown__chevron {
@@ -2643,7 +2645,7 @@ span.page-numbers.current {
 .features-dropdown__panel {
   display: none;
   position: absolute;
-  top: calc(100% + 4px);
+  top: 100%;
   left: 0;
   right: 0;
   z-index: 100;
