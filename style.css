@@ -2627,7 +2627,9 @@ span.page-numbers.current {
 }
 
 .features-dropdown.is-open .features-dropdown__toggle {
-  border-color: #BFA570;
+  border-color: #d0d0d0;
+  border-radius: 26px 26px 0 0;
+  border-bottom-color: transparent;
 }
 
 .features-dropdown__chevron {
@@ -2643,35 +2645,21 @@ span.page-numbers.current {
 .features-dropdown__panel {
   display: none;
   position: absolute;
-  top: calc(100% + 4px);
+  top: 100%;
   left: 0;
   right: 0;
   z-index: 100;
-  border-radius: 12px;
+  border-radius: 4px;
   border: 1.5px solid #737373;
-  background: rgba(30, 30, 30, 0.95);
-  backdrop-filter: blur(10px);
-  padding: 6px 0;
+  background: #ffffff;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  padding: 0;
   max-height: 260px;
   overflow-y: auto;
 }
 
 .features-dropdown.is-open .features-dropdown__panel {
   display: block;
-}
-
-/* Scrollbar styling for the panel */
-.features-dropdown__panel::-webkit-scrollbar {
-  width: 4px;
-}
-
-.features-dropdown__panel::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-.features-dropdown__panel::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.2);
-  border-radius: 2px;
 }
 
 /* Individual option rows */
@@ -2690,7 +2678,7 @@ span.page-numbers.current {
 }
 
 .features-dropdown__option:hover {
-  background-color: rgba(191, 165, 112, 0.2);
+  background-color: #f2f2f2;
 }
 
 /* Visually hide the native checkbox but keep it focusable for accessibility */
@@ -2711,29 +2699,29 @@ span.page-numbers.current {
 .features-dropdown__option-text {
   flex: 1;
   font-family: Satoshi, sans-serif;
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 400;
-  color: #ffffff;
-  letter-spacing: 0.3px;
+  color: #333333;
+  letter-spacing: normal;
 }
 
 /* Checkmark tick */
 .features-dropdown__tick {
   width: 18px;
   text-align: center;
-  color: #BFA570;
+  color: #333333;
   font-size: 14px;
   font-weight: 700;
   flex-shrink: 0;
 }
 
-/* Selected option row has subtle gold tint */
+/* Selected option row */
 .features-dropdown__option:has(input:checked) {
-  background-color: rgba(191, 165, 112, 0.08);
+  background-color: #f5f5f5;
 }
 
 .features-dropdown__option:has(input:checked):hover {
-  background-color: rgba(191, 165, 112, 0.2);
+  background-color: #f2f2f2;
 }
 
 /* Filter actions — sits in the 4th column of row 2 */
@@ -2760,6 +2748,11 @@ span.page-numbers.current {
 
 .reset-filters-link:hover {
   opacity: 0.7;
+}
+
+.property-filter-inline-actions .reset-filters-link,
+.property-filter-inline-actions .reset-filters-link:visited {
+  color: #ffffff;
 }
 
 /* Overrides Choices.js library styles which use high-specificity
@@ -2789,6 +2782,11 @@ span.page-numbers.current {
   border-radius: 26px 26px 0 0;
   border-bottom-color: transparent;
   padding: 10px 22px;
+}
+
+.property-filter-form .choices.is-open .choices__inner,
+.property-filter-form-mobile .choices.is-open .choices__inner {
+  border-color: #BFA570;
 }
 
 .property-filter-controls .choices__list--dropdown,
